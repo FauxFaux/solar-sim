@@ -1,5 +1,6 @@
 import { Component, type ComponentChildren, type ErrorInfo } from 'preact';
 import { type ErrorObject, serializeError } from 'serialize-error';
+import type { UrlState } from './url-handler.tsx';
 
 interface CrashState {
   error?: unknown;
@@ -7,14 +8,17 @@ interface CrashState {
 }
 
 export class CrashHandler extends Component<
-  { children: ComponentChildren },
+  { children: ComponentChildren; us: UrlState },
   CrashState
 > {
   componentDidCatch(error: unknown, errorInfo: ErrorInfo) {
     this.setState({ error, errorInfo });
   }
 
-  render(props: { children: ComponentChildren }, state: CrashState) {
+  render(
+    props: { children: ComponentChildren; us: UrlState },
+    state: CrashState,
+  ) {
     if (!state.error) {
       return props.children;
     }
@@ -54,6 +58,8 @@ export class CrashHandler extends Component<
             </p>
           );
         })}
+        <h3>state</h3>
+        <pre>{JSON.stringify(props.us, null, 2)}</pre>
       </div>
     );
   }

@@ -26,6 +26,7 @@ export function UrlHandler() {
           v: 1,
           huc: '2',
           hub: 2700,
+          hht: 'p',
           loc: [52.3, -1.4],
           ori: [40, 25],
           kwp: 4.4,
@@ -39,7 +40,7 @@ export function UrlHandler() {
   useEffect(() => setHash(us), [us]);
 
   return (
-    <CrashHandler>
+    <CrashHandler us={us}>
       <App uss={[us, setUs]} />
     </CrashHandler>
   );
