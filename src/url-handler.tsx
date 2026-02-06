@@ -6,10 +6,25 @@ import { CrashHandler } from './crash-handler.tsx';
 
 export interface UrlState {
   v: 1;
+
+  // home usage class
   huc: '1' | '2' | '4' | 'c';
+  // home usage basic
   hub: number;
+
+  // home heating type
   hht: 'g' | 'e' | 'p';
+  // home estimate by gas
+  heg?: number;
+  // home estimate by epc
+  hee: number;
+  // home estimate by floor area
+  hef?: number;
+
+  // house location
   loc: [lat: number, lon: number];
+
+  // installation details
   ori: [slope: number, ori: number];
   kwp: number;
 }
@@ -27,6 +42,7 @@ export function UrlHandler() {
           huc: '2',
           hub: 2700,
           hht: 'p',
+          hee: 68,
           loc: [52.3, -1.4],
           ori: [40, 25],
           kwp: 4.4,

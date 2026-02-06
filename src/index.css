@@ -151,3 +151,9 @@ form.heating-usage > label {
   left: 100%;
   margin-left: 15px;
 }
+
+.disabled {
+  opacity: 0.2;
+  pointer-events: none;
+  filter: grayscale();
+}
