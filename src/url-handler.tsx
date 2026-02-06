@@ -9,6 +9,8 @@ export interface UrlState {
   huc: '1' | '2' | '4' | 'c';
   hub: number;
   loc: [lat: number, lon: number];
+  ori: [slope: number, ori: number];
+  kwp: number;
 }
 
 const setHash = debounce((v: UrlState) => {
@@ -24,6 +26,8 @@ export function UrlHandler() {
           huc: '2',
           hub: 2700,
           loc: [52.3, -1.4],
+          ori: [40, 25],
+          kwp: 4.4,
         },
   );
 

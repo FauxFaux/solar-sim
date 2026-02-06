@@ -28,8 +28,6 @@ export function LocationPicker({ uss: [us, setUs] }: { uss: State<UrlState> }) {
     (1 - (lat - vstart) / vrange) * 424,
   ];
 
-  const zone = findZone(us.loc);
-
   return (
     <div>
       <h3>Location</h3>
@@ -49,11 +47,6 @@ export function LocationPicker({ uss: [us, setUs] }: { uss: State<UrlState> }) {
         <image href={biMap} width={350} height={424} />
         <PiSolarRoof x={point[0] - 9} y={point[1] - 9} fill={'#6464f4'} />
       </svg>
-      <p>
-        {lat.toFixed(2)}°N, {lon.toFixed(2)}°E
-        <br />
-        MCS zone: {zone.name}
-      </p>
     </div>
   );
 }

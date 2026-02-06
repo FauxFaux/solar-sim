@@ -12,7 +12,7 @@ for i, sheet in enumerate(f.sheet_names):
     data = f.parse(sheet)
     this_out = []
     for row in data[1:].itertuples():
-        this_out.append(list(row)[3:])
+        this_out.append([round(x) for x in list(row)[3:]])
     out.append(this_out)
 
 with open(assets / 'mcs.json', 'w') as f:
