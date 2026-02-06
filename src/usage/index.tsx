@@ -7,7 +7,7 @@ export function HomeUsage({ uss }: { uss: State<UrlState> }) {
   return (
     <>
       <BasicUsage uss={uss} />
-      {false && <HeatingUsage uss={uss} />}
+      <HeatingUsage uss={uss} />
     </>
   );
 }

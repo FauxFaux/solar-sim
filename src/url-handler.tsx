@@ -8,6 +8,7 @@ export interface UrlState {
   v: 1;
   huc: '1' | '2' | '4' | 'c';
   hub: number;
+  hht: 'g' | 'e' | 'p';
   loc: [lat: number, lon: number];
   ori: [slope: number, ori: number];
   kwp: number;

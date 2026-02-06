@@ -27,6 +27,7 @@ export function OrientationPicker({ uss }: { uss: State<UrlState> }) {
       <p>
         {slope}° from horizontal, {ori}° from south
       </p>
+      <p>MCS zone: {zone.name}</p>
     </div>
   );
 }

@@ -11,7 +11,8 @@
   "dependencies": {
     "fflate": "^0.8.2",
     "preact": "^10",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "serialize-error": "^13.0.1"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2",

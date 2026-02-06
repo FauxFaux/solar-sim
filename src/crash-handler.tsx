@@ -1,4 +1,5 @@
 import { Component, type ComponentChildren, type ErrorInfo } from 'preact';
+import { type ErrorObject, serializeError } from 'serialize-error';
 
 interface CrashState {
   error?: unknown;
@@ -14,15 +15,46 @@ export class CrashHandler extends Component<
   }
 
   render(props: { children: ComponentChildren }, state: CrashState) {
-    if (state.error) {
-      return (
-        <div style={{ color: 'red' }}>
-          <h1>Something went wrong</h1>
-          <pre>{String(state.error)}</pre>
-        </div>
-      );
+    if (!state.error) {
+      return props.children;
     }
 
-    return props.children;
+    const errors: ErrorObject[] = [];
+
+    let here = serializeError(state.error);
+    for (let i = 0; i < 10; i++) {
+      errors.push(here);
+      if (!here.cause) {
+        break;
+      }
+      here = serializeError(here.cause);
+    }
+
+    return (
+      <div style={{ color: 'red', minWidth: '800px' }}>
+        <h1>Something went wrong</h1>
+        <p>
+          Try <a href={'/'}>clearing your state</a>?
+        </p>
+        {errors.map((err, i) => {
+          const otherProps = { ...err };
+          delete otherProps.name;
+          delete otherProps.message;
+          delete otherProps.stack;
+          return (
+            <p key={i}>
+              <pre>{err.stack}</pre>
+              <pre>
+                {Object.keys(otherProps).length ? (
+                  <pre>{JSON.stringify(otherProps)}</pre>
+                ) : (
+                  <></>
+                )}
+              </pre>
+            </p>
+          );
+        })}
+      </div>
+    );
   }
 }
