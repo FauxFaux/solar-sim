@@ -8,6 +8,7 @@ export interface UrlState {
   v: 1;
   huc: '1' | '2' | '4' | 'c';
   hub: number;
+  loc: [lat: number, lon: number];
 }
 
 const setHash = debounce((v: UrlState) => {
@@ -22,6 +23,7 @@ export function UrlHandler() {
           v: 1,
           huc: '2',
           hub: 2700,
+          loc: [52.3, -1.4],
         },
   );
 

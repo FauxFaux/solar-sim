@@ -26,3 +26,8 @@ export const entriesOf = Object.entries as <T extends object>(
 export const valuesOf = Object.values as <T extends object>(
   obj: T,
 ) => Array<T[keyof T]>;
+
+export const oneDp = (n: number) => Math.round(n * 10) / 10;
+export const twoDp = (n: number) => Math.round(n * 100) / 100;
+
+export const range = (n: number) => Array.from({ length: n }, (_, i) => i);

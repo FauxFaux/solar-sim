@@ -25,9 +25,14 @@ body {
   min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+#app {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1em;
+}
+
+#app > div {
+  flex: 1;
 }
 
 button {
@@ -47,6 +52,10 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+input[type='number'] {
+  text-align: right;
 }
 
 form.home-usage > label {
@@ -70,4 +79,17 @@ form.home-usage > label > input:first-child {
 
 form.home-usage svg {
   margin: 0 0.2em;
+}
+
+form.heating-usage {
+  display: flex;
+}
+
+form.heating-usage > label {
+  display: block;
+  border: 1px solid #343444;
+  background: #242444;
+  border-radius: 8px;
+  padding: 0.4em 0.4em;
+  cursor: pointer;
 }
