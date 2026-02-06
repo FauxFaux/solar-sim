@@ -20,7 +20,8 @@ export function SysStats({ uss: [us] }: { uss: State<UrlState> }) {
       <p>Total generation: {Math.round(gen).toLocaleString()} kWh/yr</p>
       <h4>
         By month, with{' '}
-        <span style={'color: #2b2; font-weight: normal'}>estimated usage</span>
+        <span style={'color: #2b2; font-weight: normal'}>usage</span> and{' '}
+        <span style={'color: #b22; font-weight: normal'}>heat</span>
       </h4>
       <ByMonth us={us} />
       <h4>By hour, sunny, south facing</h4>

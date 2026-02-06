@@ -1,5 +1,6 @@
 import type { UrlState } from '../url-handler.tsx';
 import { findZone } from './mcs.ts';
+import { heatCalculation } from '../usage/heating.tsx';
 
 export function ByMonth({ us }: { us: UrlState }) {
   const zone = findZone(us.loc);
@@ -13,6 +14,8 @@ export function ByMonth({ us }: { us: UrlState }) {
   const h = 200;
   const tw = w - ox;
   const th = h - 30;
+
+  const { heatEstimate } = heatCalculation(us);
 
   const vToY = (v: number) => (v * 12 * th) / h;
 
@@ -57,6 +60,12 @@ export function ByMonth({ us }: { us: UrlState }) {
             <text x={vx + 9} y={h - 8} text-anchor={'middle'} fill={'#ddd'}>
               {cal[i]}
             </text>
+            <circle
+              cx={vx + 9}
+              cy={th - (((heatByMo[i] / 100) * heatEstimate) / gen) * 12 * 100}
+              r={4}
+              fill={'#b22'}
+            />
           </g>
         );
       })}
@@ -81,3 +90,7 @@ export function ByMonth({ us }: { us: UrlState }) {
 const cal = 'JFMAMJJASOND';
 
 const byMo = [3.0, 4.5, 8.8, 11.0, 12.0, 13.5, 14.0, 11.5, 9.0, 6.0, 4.2, 2.5];
+
+const heatByMo = [
+  14.5, 15.4, 13.9, 12.4, 8.7, 5.4, 3.0, 2.4, 2.3, 3.3, 7.3, 11.4,
+];

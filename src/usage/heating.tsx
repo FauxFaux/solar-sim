@@ -6,12 +6,25 @@ import { LuHeater } from 'react-icons/lu';
 import type { ComponentChildren } from 'preact';
 import { EpcPicker } from './epc-picker.tsx';
 
-export function HeatingUsage({ uss: [us, setUs] }: { uss: State<UrlState> }) {
+export function heatCalculation(us: UrlState) {
   const gasUsage = us.heg || Math.round((4.11 * us.hub + 210) / 100) * 100;
   const floorEstimate = us.hef || Math.round(0.02867 * us.hub + 22.9);
   const hotWater = us.hub / 4 + 1500;
   const gasFromEpc = (-3.55 * us.hee + 343) * floorEstimate + hotWater;
-  const heatEstimate = Math.round(us.heg ? gasUsage : gasFromEpc) * 0.85;
+  const heatEstimate = Math.round(
+    (us.heg ? gasUsage : gasFromEpc) * 0.85 * mul[us.hht],
+  );
+  return { gasUsage, floorEstimate, heatEstimate };
+}
+
+const mul = {
+  g: 0,
+  p: 1 / 3.5,
+  e: 1,
+} as const;
+
+export function HeatingUsage({ uss: [us, setUs] }: { uss: State<UrlState> }) {
+  const { gasUsage, floorEstimate, heatEstimate } = heatCalculation(us);
 
   const heatings: Record<UrlState['hht'], [string, ComponentChildren]> = {
     g: ['gas', <VscFlame />],
@@ -41,10 +54,10 @@ export function HeatingUsage({ uss: [us, setUs] }: { uss: State<UrlState> }) {
           </label>
         ))}
       </form>
-      <div className={'strike'} style={'margin-top: 1em'}>
+      <div className={'strike'} style={'margin-top: 0.4em'}>
         <span>estimate with</span>
       </div>
-      <p>
+      <p style={'margin: 0.4em 0'}>
         <input
           type={'number'}
           min={0}
@@ -65,7 +78,7 @@ export function HeatingUsage({ uss: [us, setUs] }: { uss: State<UrlState> }) {
       <div className={'strike ' + (us.heg ? 'disabled' : '')}>
         <span>or</span>
       </div>
-      <p class={us.heg ? 'disabled' : ''}>
+      <p class={us.heg ? 'disabled' : ''} style={'margin: 0.4em 0'}>
         <EpcPicker uss={[us, setUs]} />
         <input
           type={'number'}
@@ -85,16 +98,9 @@ export function HeatingUsage({ uss: [us, setUs] }: { uss: State<UrlState> }) {
         m² floor area
       </p>
       <hr />
-      <p>
-        {Math.round(heatEstimate * mul[us.hht]).toLocaleString()} kWh/yr used
-        for heating
+      <p style={'margin: 0.4em 0'}>
+        {Math.round(heatEstimate).toLocaleString()} kWh/yr used for heating
       </p>
     </div>
   );
 }
-
-const mul = {
-  g: 0,
-  p: 1 / 3.5,
-  e: 1,
-} as const;
