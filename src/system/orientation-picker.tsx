@@ -7,8 +7,6 @@ export function OrientationPicker({ uss }: { uss: State<UrlState> }) {
   const [us, setUs] = uss;
   const zone = findZone(us.loc);
   const [slope, ori] = us.ori;
-  const mcs = zone.data;
-  const gen = mcs[slope]?.[Math.round(ori / 5)] * us.kwp;
   return (
     <div>
       <h3>Solar system</h3>
@@ -29,7 +27,6 @@ export function OrientationPicker({ uss }: { uss: State<UrlState> }) {
       <p>
         {slope}° from horizontal, {ori}° from south
       </p>
-      <p>{Math.round(gen)}</p>
     </div>
   );
 }
