@@ -32,13 +32,22 @@ body {
 #app {
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-evenly;
+  width: 100%;
   gap: 1em;
+}
+
+@media (min-width: 2400px) {
+  #app {
+    width: 2400px;
+  }
 }
 
 #app > div {
   flex: 1;
   width: 350px;
   min-width: 350px;
+  max-width: 350px;
 }
 
 button {
