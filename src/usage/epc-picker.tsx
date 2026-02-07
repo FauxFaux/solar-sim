@@ -1,4 +1,4 @@
-import type { State } from '../ts.ts';
+import { entriesOf, type State } from '../ts.ts';
 import type { UrlState } from '../url-handler.tsx';
 
 export function EpcPicker({ uss: [us, setUs] }: { uss: State<UrlState> }) {
@@ -23,19 +23,22 @@ export function EpcPicker({ uss: [us, setUs] }: { uss: State<UrlState> }) {
           EPC
         </text>
       </g>
-      {EPCs.map((c, i) => {
+      {entriesOf(EPCs).map(([c, r], i) => {
+        const [s, e] = r;
+        const w = (e - s + 1) * 3;
+        const x = 25 + (100 - e + 1) * 3;
         return (
           <g key={i} style={'cursor: pointer'}>
             <rect
-              x={25 + i * 50}
+              x={x}
               y={0}
-              width={50}
+              width={w}
               height={50}
-              fill={`hsl(${(5 - i) * 20}, 70%, 40%)`}
+              fill={`hsl(${(5.5 - i) * 20}, 70%, 40%)`}
             />
             <text
               text-anchor={'middle'}
-              x={25 + i * 50 + 25}
+              x={x + w / 2}
               y={35}
               font-size={30}
               stroke={'#222'}
@@ -50,7 +53,7 @@ export function EpcPicker({ uss: [us, setUs] }: { uss: State<UrlState> }) {
       <g transform={`translate(${(100 - epc) * 3 - 40}, 22) rotate(-90 65 15)`}>
         <polygon
           points={'0,0 50,0 65,15 50,30 0,30'}
-          fill={`hsl(${epc}, 70%, 40%)`}
+          fill={`hsl(${epc - 10}, 70%, 40%)`}
           stroke={'#222'}
         />
         <text
@@ -69,4 +72,12 @@ export function EpcPicker({ uss: [us, setUs] }: { uss: State<UrlState> }) {
   );
 }
 
-const EPCs = 'ABCDEF'.split('');
+const EPCs = {
+  A: [92, 100],
+  B: [81, 91],
+  C: [69, 80],
+  D: [55, 68],
+  E: [39, 54],
+  F: [21, 38],
+  G: [1, 20],
+} as const;
