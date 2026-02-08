@@ -4,8 +4,11 @@ import tableRaw from '../assets/mcs.json';
 export const slopes = 91;
 export const oris = 36;
 
-const table = tableRaw.map(v => chunks(deltaDecode(deltaDecode(v)), oris)
-  .map(((v, i) => i % 2 === 0 ? v.reverse() : v)));
+const table = tableRaw.map((v) =>
+  chunks(deltaDecode(deltaDecode(v)), oris).map((v, i) =>
+    i % 2 === 0 ? v.reverse() : v,
+  ),
+);
 
 interface Zone {
   name: string;

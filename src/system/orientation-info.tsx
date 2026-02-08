@@ -1,6 +1,6 @@
 import { range, type State } from '../ts.ts';
 import type { UrlState } from '../url-handler.tsx';
-import {oris, slopes} from "./mcs.ts";
+import { oris, slopes } from './mcs.ts';
 
 export function OrientationInfo({
   mcs,
@@ -13,7 +13,6 @@ export function OrientationInfo({
   const h = 380;
   const tw = 330;
   const th = 350;
-
 
   const min = 204;
   const max = 1132;

@@ -166,3 +166,18 @@ form.heating-usage > label {
   pointer-events: none;
   filter: grayscale();
 }
+
+.load-profile-table {
+  width: 100%;
+}
+.load-profile-table td {
+  padding: 0.2em;
+}
+
+.load-profile-table input:first-child {
+  display: none;
+}
+
+.load-profile-table tr.selected {
+  background: #3434a4;
+}
