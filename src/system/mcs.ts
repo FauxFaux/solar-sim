@@ -1,4 +1,11 @@
-import table from '../assets/mcs.json';
+import tableRaw from '../assets/mcs.json';
+
+// size of the real array
+export const slopes = 91;
+export const oris = 36;
+
+const table = tableRaw.map(v => chunks(deltaDecode(deltaDecode(v)), oris)
+  .map(((v, i) => i % 2 === 0 ? v.reverse() : v)));
 
 interface Zone {
   name: string;
@@ -81,3 +88,21 @@ const centres: [number, number][] = [
   [58.33, 1.56],
   [54.52, -6.6],
 ];
+
+function deltaDecode(arr: number[]): number[] {
+  const out = [];
+  let acc = 0;
+  for (const v of arr) {
+    acc += v;
+    out.push(acc);
+  }
+  return out;
+}
+
+function chunks(arr: number[], size: number): number[][] {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) {
+    out.push(arr.slice(i, i + size));
+  }
+  return out;
+}
