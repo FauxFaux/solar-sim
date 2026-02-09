@@ -31,3 +31,17 @@ export const oneDp = (n: number) => Math.round(n * 10) / 10;
 export const twoDp = (n: number) => Math.round(n * 100) / 100;
 
 export const range = (n: number) => Array.from({ length: n }, (_, i) => i);
+
+export type Result<T> =
+  | { success: true; value: T }
+  | { success: false; error: Error };
+
+export function andThen<T>(
+  fn: () => Promise<Result<T>>,
+  // do I understand why this union is here?
+  set: Setter<Result<T>> | ((v: Result<T>) => void),
+) {
+  fn()
+    .then((r) => set(r))
+    .catch((error) => set({ success: false, error }));
+}

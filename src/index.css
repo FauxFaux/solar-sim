@@ -35,11 +35,12 @@ body {
   justify-content: space-evenly;
   width: 100%;
   gap: 1em;
+  margin: 0 auto;
 }
-
-@media (min-width: 2400px) {
+/* (350+25)*4=1500 */
+@media (min-width: 1700px) {
   #app {
-    width: 2400px;
+    max-width: 1700px;
   }
 }
 
