@@ -1,6 +1,10 @@
 import { range } from '../ts.ts';
+import { useContext } from 'preact/hooks';
+import { TransContext } from '../app.tsx';
 
 export function ByHour({ kwp }: { kwp: number }) {
+  const [ts] = useContext(TransContext);
+
   const displayHours = 14;
 
   const startHour = 6;
@@ -13,13 +17,14 @@ export function ByHour({ kwp }: { kwp: number }) {
   const th = h - 40 - oy;
   const tw = w - ox;
 
-  function prods(datums: number[], fill: string) {
+  function prods(datums: number[], fill: string, ffill: string) {
     return range(displayHours)
       .map((hr) => hr + startHour)
       .map((hr) => {
         const hFrac = datums[hr];
         const x = ox + (hr - startHour) * (tw / displayHours);
         const y = hFrac * th;
+        const focused = ts.billPointy?.[1] === hr;
         return (
           <g key={hr}>
             <rect
@@ -27,7 +32,7 @@ export function ByHour({ kwp }: { kwp: number }) {
               y={oy + th - y}
               width={(w / displayHours) * 0.8}
               height={y}
-              fill={fill}
+              fill={focused ? ffill : fill}
             >
               <title>
                 {hr}:00: {(hFrac * kwp).toFixed(1)} kWh
@@ -45,8 +50,8 @@ export function ByHour({ kwp }: { kwp: number }) {
 
   return (
     <svg width={350} height={200}>
-      {prods(prodAug, '#cb4')}
-      {prods(prodJan, '#44a5cc66')}
+      {prods(prodAug, '#cb4', '#e5d028')}
+      {prods(prodJan, '#44a5cc66', '#44a5cc66')}
       <text x={ox + 70} y={62} fill={'#44a5cc'} text-anchor={'end'}>
         winter
       </text>

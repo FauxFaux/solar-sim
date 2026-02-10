@@ -1,8 +1,13 @@
 import type { UrlState } from '../url-handler.tsx';
 import { findZone } from './mcs.ts';
 import { heatCalculation } from '../usage/heating.tsx';
+import { useContext } from 'preact/hooks';
+import { TransContext } from '../app.tsx';
 
 export function ByMonth({ us }: { us: UrlState }) {
+  const [ts] = useContext(TransContext);
+  const pointMonth = (ts?.billPointy?.[0]?.month ?? 0) - 1;
+
   const zone = findZone(us.loc);
   const [slope, ori] = us.ori;
   const mcs = zone.data;
@@ -51,7 +56,7 @@ export function ByMonth({ us }: { us: UrlState }) {
               y={th - vi}
               width={(tw / 12) * 0.8}
               height={vi}
-              fill={'#cb4'}
+              fill={i === pointMonth ? '#cb4' : '#a29436'}
             >
               <title>
                 {cal[i]}: {v.toFixed(1)}%: {((gen * v) / 100).toFixed()}kWh/mo

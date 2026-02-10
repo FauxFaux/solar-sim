@@ -1,8 +1,12 @@
 import { range } from '../ts.ts';
 import { isSetAndFinite, type MaybeNumber } from './bill.ts';
 import type { Stats } from './bill-analysis.tsx';
+import { useContext } from 'preact/hooks';
+import { TransContext } from '../app.tsx';
 
 export function DayView({ day, stats }: { day: MaybeNumber[]; stats: Stats }) {
+  const [, setTs] = useContext(TransContext);
+
   const w = 350;
   const h = 120;
   const ox = 30;
@@ -53,6 +57,14 @@ export function DayView({ day, stats }: { day: MaybeNumber[]; stats: Stats }) {
               width={tw / 24 - 2}
               height={height}
               fill={`hsl(${hue}, 70%, 40%)`}
+              onMouseEnter={() =>
+                setTs((ts) => ({
+                  ...ts,
+                  billPointy: ts.billPointy
+                    ? [ts.billPointy[0], hr]
+                    : undefined,
+                }))
+              }
             >
               <title>
                 {hr}:00: {isSetAndFinite(val) ? val.toFixed(2) : '???'} kWh

@@ -8,11 +8,12 @@ import {
   type Result,
   type State,
 } from '../ts.ts';
-import { useEffect, useState } from 'preact/hooks';
+import { useContext, useEffect, useState } from 'preact/hooks';
 import { BillView } from './bill-view.tsx';
 import {
   isSetAndFinite,
   type LocalDate,
+  type MaybeNumber,
   parseBill,
   type ParsedBill,
   timeWindows,
@@ -21,11 +22,22 @@ import { DayView } from './day-view.tsx';
 import { Hint } from '../hint.tsx';
 import exampleBill from './example-bill.json';
 import type { ComponentChildren } from 'preact';
+import { TransContext } from '../app.tsx';
+import { Temporal } from 'temporal-polyfill';
 
 export function BillAnalysis({ uss }: { uss: State<UrlState> }) {
   const [file, setFile] = useState<File | undefined>(undefined);
+  const [_ts, setTs] = useContext(TransContext);
+
   // (real default set as an effect; typing hack)
-  const cursors = useState('1980-01-01' as LocalDate);
+  const [cursor, setCursorReal] = useState('1980-01-01' as LocalDate);
+  const setCursor = (date: LocalDate) => {
+    setCursorReal(date);
+    setTs((ts) => ({
+      ...ts,
+      billPointy: [Temporal.PlainDate.from(date), NaN],
+    }));
+  };
   const [parsed, setParsed] = useState<Result<ParsedBill>>(
     exampleBill as Result<ParsedBill>,
   );
@@ -40,7 +52,7 @@ export function BillAnalysis({ uss }: { uss: State<UrlState> }) {
 
   useEffect(() => {
     if (!parsed?.success) return;
-    cursors[1](keysOf(parsed.value).sort()[0]);
+    setCursor(keysOf(parsed.value).sort()[0]);
   }, [parsed]);
 
   const stats = countStats(parsed?.success ? parsed.value : {});
@@ -65,12 +77,8 @@ export function BillAnalysis({ uss }: { uss: State<UrlState> }) {
     const bill = parsed.value;
     content = (
       <>
-        <p>
-          <BillView bill={bill} cursors={cursors} />
-        </p>
-        <p>
-          <DayView day={bill[cursors[0]]} stats={stats} />
-        </p>
+        <BillView bill={bill} cursors={[cursor, setCursor]} />
+        <DayView day={bill[cursor]} stats={stats} />
         <table style={'width: 100%'}>
           <tbody>
             {entriesOf(stats.byWindow).map(([window, nums]) => (
@@ -79,6 +87,7 @@ export function BillAnalysis({ uss }: { uss: State<UrlState> }) {
                 window={window}
                 nums={nums}
                 peak={stats.peak}
+                today={bill[cursor]}
               />
             ))}
           </tbody>
@@ -109,10 +118,12 @@ function WindowRow({
   window,
   nums,
   peak,
+  today,
 }: {
   window: keyof typeof timeWindows;
   nums: number[];
   peak: number;
+  today: MaybeNumber[];
 }) {
   const sumUnscaled = nums.reduce((a, b) => a + b, 0) || 0;
   const mean = sumUnscaled / nums.length / peak;
@@ -152,6 +163,21 @@ function WindowRow({
               />
             );
           })}
+          {today
+            ?.filter((v) => isSetAndFinite(v))
+            .filter((_, hr) => (timeWindow as readonly number[]).includes(hr))
+            .map((v) => {
+              const perc = v / peak;
+              return (
+                <rect
+                  x={perc * w - 1}
+                  y={0}
+                  width={3}
+                  height={h}
+                  fill={`hsla(${100 - perc * 100}, 70%, 35%, 0.8)`}
+                />
+              );
+            })}
 
           <line
             x1={p02 * w}

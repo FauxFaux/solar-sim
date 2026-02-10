@@ -13,7 +13,7 @@ export function BillView({
   cursors: [cursor, setCursor],
 }: {
   bill: ParsedBill;
-  cursors: State<LocalDate>;
+  cursors: [LocalDate, (date: LocalDate) => void];
 }) {
   const tileWidth = 48;
   const tileHeight = 30;
