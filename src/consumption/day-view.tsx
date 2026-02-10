@@ -1,14 +1,8 @@
 import { range } from '../ts.ts';
-import { isSetAndFinite } from './bill.ts';
+import { isSetAndFinite, type MaybeNumber } from './bill.ts';
 import type { Stats } from './bill-analysis.tsx';
 
-export function DayView({
-  day,
-  stats,
-}: {
-  day: (number | undefined)[];
-  stats: Stats;
-}) {
+export function DayView({ day, stats }: { day: MaybeNumber[]; stats: Stats }) {
   const w = 350;
   const h = 120;
   const ox = 30;

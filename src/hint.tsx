@@ -5,7 +5,13 @@ import { useState } from 'preact/hooks';
 export function Hint({ children }: { children: ComponentChildren }) {
   const [visible, setVisible] = useState(false);
   return (
-    <div style={{ display: 'inline-block', position: 'relative' }}>
+    <div
+      style={{
+        display: 'inline-block',
+        position: 'relative',
+        fontWeight: 'normal',
+      }}
+    >
       <button
         onClick={() => setVisible((v) => !v)}
         style={{

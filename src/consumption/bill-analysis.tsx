@@ -18,31 +18,81 @@ import {
   timeWindows,
 } from './bill.ts';
 import { DayView } from './day-view.tsx';
+import { Hint } from '../hint.tsx';
+import exampleBill from './example-bill.json';
+import type { ComponentChildren } from 'preact';
 
 export function BillAnalysis({ uss }: { uss: State<UrlState> }) {
   const [file, setFile] = useState<File | undefined>(undefined);
   // (real default set as an effect; typing hack)
   const cursors = useState('1980-01-01' as LocalDate);
-  const [parsed, setParsed] = useState<Result<ParsedBill> | undefined>(
-    undefined,
+  const [parsed, setParsed] = useState<Result<ParsedBill>>(
+    exampleBill as Result<ParsedBill>,
   );
 
   useEffect(() => {
     if (!file) return;
     andThen(
       async () => parseBill(await file.text()),
-      (result) => {
-        setParsed(result);
-        if (result.success) cursors[1](keysOf(result.value).sort()[0]);
-      },
+      (result) => setParsed(result),
     );
   }, [file]);
 
+  useEffect(() => {
+    if (!parsed?.success) return;
+    cursors[1](keysOf(parsed.value).sort()[0]);
+  }, [parsed]);
+
   const stats = countStats(parsed?.success ? parsed.value : {});
+
+  const downloadHint = (
+    <Hint>
+      Export six weeks of data, starting on a Monday, from e.g. your{' '}
+      <a
+        href={'https://octopus.energy/dashboard/new/my-energy'}
+        target={'_blank'}
+      >
+        Octopus &rarr; My energy &rarr; download your usage
+      </a>
+      .
+    </Hint>
+  );
+
+  let content: ComponentChildren;
+  if (!parsed) {
+    content = 'Loading...';
+  } else if (parsed.success) {
+    const bill = parsed.value;
+    content = (
+      <>
+        <p>
+          <BillView bill={bill} cursors={cursors} />
+        </p>
+        <p>
+          <DayView day={bill[cursors[0]]} stats={stats} />
+        </p>
+        <table style={'width: 100%'}>
+          <tbody>
+            {entriesOf(stats.byWindow).map(([window, nums]) => (
+              <WindowRow
+                key={window}
+                window={window}
+                nums={nums}
+                peak={stats.peak}
+              />
+            ))}
+          </tbody>
+        </table>
+      </>
+    );
+  } else {
+    console.log(parsed.error);
+    content = 'Failed to parse file: ' + parsed.error;
+  }
 
   return (
     <div>
-      <h3>Bill analysis</h3>
+      <h3>Bill analysis {downloadHint}</h3>
       <p>
         <input
           type={'file'}
@@ -50,30 +100,7 @@ export function BillAnalysis({ uss }: { uss: State<UrlState> }) {
           onChange={(e) => setFile(e.currentTarget.files?.[0])}
         />
       </p>
-      {parsed?.success ? (
-        <>
-          <p>
-            <BillView bill={parsed.value} cursors={cursors} />
-          </p>
-          <p>
-            <DayView day={parsed.value[cursors[0]]} stats={stats} />
-          </p>
-          <table style={'width: 100%'}>
-            <tbody>
-              {entriesOf(stats.byWindow).map(([window, nums]) => (
-                <WindowRow
-                  key={window}
-                  window={window}
-                  nums={nums}
-                  peak={stats.peak}
-                />
-              ))}
-            </tbody>
-          </table>
-        </>
-      ) : (
-        'No file loaded'
-      )}
+      {content}
     </div>
   );
 }

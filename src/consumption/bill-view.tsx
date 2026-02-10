@@ -55,13 +55,15 @@ export function BillView({
               onMouseEnter={() => {
                 if (!picked) setCursor(date);
               }}
-              onClick={() => {
+              onClick={(e) => {
                 if (picked && cursor === date) {
                   setPicked(false);
                 } else {
                   setCursor(date);
                   setPicked(true);
                 }
+                e.preventDefault();
+                return false;
               }}
             >
               <title>

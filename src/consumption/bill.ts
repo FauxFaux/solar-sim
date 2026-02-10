@@ -1,10 +1,12 @@
-import { entriesOf, type Result } from '../ts.ts';
+import { entriesOf, type Result, twoDp } from '../ts.ts';
 import { Temporal } from 'temporal-polyfill';
 import * as Papa from 'papaparse';
 
 export type LocalDate = `${number}-${number}-${number}`;
 
-export type ParsedBill = Record<LocalDate, (number | undefined)[]>;
+export type MaybeNumber = number | undefined | null;
+
+export type ParsedBill = Record<LocalDate, MaybeNumber[]>;
 
 export function parseBill(text: string): Result<ParsedBill> {
   const res = Papa.parse(text, {
@@ -65,14 +67,13 @@ export function parseBill(text: string): Result<ParsedBill> {
 
   const value: ParsedBill = {};
   for (const [date, hourMap] of entriesOf(byDateHour)) {
-    const hourList: (number | undefined)[] = [];
+    const hourList: MaybeNumber[] = [];
     for (let hour = 0; hour < 24; hour++) {
-      hourList.push(hourMap[hour]);
+      const hm = hourMap[hour];
+      hourList.push(hm ? twoDp(hm) : null);
     }
     value[date] = hourList;
   }
-
-  console.log(value);
 
   return { success: true, value };
 }
@@ -122,8 +123,8 @@ export function dateRange(
   return range.map((v) => v.toString() as LocalDate);
 }
 
-export function isSetAndFinite(v: number | undefined): v is number {
-  return v !== undefined && isFinite(v);
+export function isSetAndFinite(v: MaybeNumber): v is number {
+  return v !== undefined && v !== null && isFinite(v);
 }
 
 export const timeWindows = {
