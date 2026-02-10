@@ -1,6 +1,6 @@
 import { Temporal } from 'temporal-polyfill';
-import type { LocalDate, ParsedBill } from './bill-analysis.tsx';
 import { keysOf, range } from '../ts.ts';
+import { dateRange, isSetAndFinite, type ParsedBill } from './bill.ts';
 
 export function BillView({ bill }: { bill: ParsedBill }) {
   const tileWidth = 48;
@@ -78,28 +78,3 @@ export function BillView({ bill }: { bill: ParsedBill }) {
 }
 
 const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-function dateRange(
-  availableDates: LocalDate[],
-  maxEntries: number,
-): LocalDate[] {
-  const sortedDates = availableDates.sort();
-  const startDate = Temporal.PlainDate.from(sortedDates[0]);
-  const endDate = Temporal.PlainDate.from(sortedDates[sortedDates.length - 1]);
-  const range: Temporal.PlainDate[] = [];
-  let currentDate = startDate;
-  while (currentDate.dayOfWeek !== 1) {
-    currentDate = currentDate.subtract({ days: 1 });
-  }
-
-  while (currentDate.until(endDate).sign === 1 && range.length < maxEntries) {
-    range.push(currentDate);
-    currentDate = currentDate.add({ days: 1 });
-  }
-
-  return range.map((v) => v.toString() as LocalDate);
-}
-
-function isSetAndFinite(v: number | undefined): v is number {
-  return v !== undefined && isFinite(v);
-}
