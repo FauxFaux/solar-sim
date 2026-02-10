@@ -21,7 +21,17 @@ export function DayView({ day, stats }: { day: MaybeNumber[]; stats: Stats }) {
 
   return (
     <>
-      <svg width={w} height={h}>
+      <svg
+        width={w}
+        height={h}
+        onMouseMove={(e) => {
+          const hr = Math.floor(((e.offsetX - ox) / tw) * 24);
+          setTs((ts) => ({
+            ...ts,
+            billPointy: ts.billPointy ? [ts.billPointy[0], hr] : undefined,
+          }));
+        }}
+      >
         <rect
           x={ox + (7 / 24) * tw}
           y={0}
@@ -57,14 +67,6 @@ export function DayView({ day, stats }: { day: MaybeNumber[]; stats: Stats }) {
               width={tw / 24 - 2}
               height={height}
               fill={`hsl(${hue}, 70%, 40%)`}
-              onMouseEnter={() =>
-                setTs((ts) => ({
-                  ...ts,
-                  billPointy: ts.billPointy
-                    ? [ts.billPointy[0], hr]
-                    : undefined,
-                }))
-              }
             >
               <title>
                 {hr}:00: {isSetAndFinite(val) ? val.toFixed(2) : '???'} kWh
