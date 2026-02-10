@@ -27,6 +27,10 @@ export const valuesOf = Object.values as <T extends object>(
   obj: T,
 ) => Array<T[keyof T]>;
 
+export const fromEntries = Object.fromEntries as <T extends object>(
+  entries: Array<[keyof T, T[keyof T]]>,
+) => T;
+
 export const oneDp = (n: number) => Math.round(n * 10) / 10;
 export const twoDp = (n: number) => Math.round(n * 100) / 100;
 
@@ -39,7 +43,7 @@ export type Result<T> =
 export function andThen<T>(
   fn: () => Promise<Result<T>>,
   // do I understand why this union is here?
-  set: Setter<Result<T>> | ((v: Result<T>) => void),
+  set: (v: Result<T>) => void,
 ) {
   fn()
     .then((r) => set(r))

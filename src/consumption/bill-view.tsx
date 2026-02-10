@@ -1,8 +1,20 @@
 import { Temporal } from 'temporal-polyfill';
-import { keysOf, range } from '../ts.ts';
-import { dateRange, isSetAndFinite, type ParsedBill } from './bill.ts';
+import { keysOf, range, type State } from '../ts.ts';
+import {
+  dateRange,
+  isSetAndFinite,
+  type LocalDate,
+  type ParsedBill,
+} from './bill.ts';
+import { useState } from 'preact/hooks';
 
-export function BillView({ bill }: { bill: ParsedBill }) {
+export function BillView({
+  bill,
+  cursors: [cursor, setCursor],
+}: {
+  bill: ParsedBill;
+  cursors: State<LocalDate>;
+}) {
   const tileWidth = 48;
   const tileHeight = 30;
   const daysPerRow = 7;
@@ -10,9 +22,11 @@ export function BillView({ bill }: { bill: ParsedBill }) {
   const oy = 10;
   // (48+1)*7=343 (of our 350)
 
+  const [picked, setPicked] = useState(false);
+
   const allDates = dateRange(keysOf(bill), rowsToShow * daysPerRow);
 
-  const max = Math.max(
+  const peak = Math.max(
     ...allDates
       .flatMap((date) => bill[date] ?? [])
       .filter((v) => isSetAndFinite(v)),
@@ -26,27 +40,46 @@ export function BillView({ bill }: { bill: ParsedBill }) {
         const tileY = oy + Math.floor(i / daysPerRow) * (tileHeight + 1);
         return (
           <g key={date} transform={`translate(${tileX}, ${tileY})`}>
-            {data && (
+            {date === cursor && (
               <rect
                 width={tileWidth}
                 height={tileHeight}
-                fill={'rgba(52,52,52,0.38)'}
-              >
-                <title>
-                  {date} (
-                  {dayNames[Temporal.PlainDate.from(date).dayOfWeek - 1]}):{' '}
-                  {data.every((v) => isSetAndFinite(v))
-                    ? data.reduce((a, b) => a + b, 0).toFixed(2)
-                    : '???'}{' '}
-                  kWh
-                </title>
-              </rect>
+                fill={'rgba(255,255,255,0.5)'}
+                pointer-events={'none'}
+              />
             )}
+            <rect
+              width={tileWidth}
+              height={tileHeight}
+              fill={'rgba(52,52,52,0.38)'}
+              onMouseEnter={() => {
+                if (!picked) setCursor(date);
+              }}
+              onClick={() => {
+                if (picked && cursor === date) {
+                  setPicked(false);
+                } else {
+                  setCursor(date);
+                  setPicked(true);
+                }
+              }}
+            >
+              <title>
+                {date} ({dayNames[Temporal.PlainDate.from(date).dayOfWeek - 1]}
+                ):{' '}
+                {data?.every((v) => isSetAndFinite(v))
+                  ? data.reduce((a, b) => a + b, 0).toFixed(2)
+                  : '???'}{' '}
+                kWh
+              </title>
+            </rect>
             {range(24).map((hr) => {
               const val = data?.[hr];
-              const height = isSetAndFinite(val) ? tileHeight * (val / max) : 5;
+              const height = isSetAndFinite(val)
+                ? tileHeight * (val / peak)
+                : 5;
               const hue = isSetAndFinite(val)
-                ? 100 - (val / max) * 100
+                ? 100 - (val / peak) * 100
                 : 220; /* blue */
               return (
                 <rect

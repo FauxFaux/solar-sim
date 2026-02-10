@@ -34,7 +34,7 @@ export function ByHour({ kwp }: { kwp: number }) {
               </title>
             </rect>
             {hr % 2 === 0 && (
-              <text x={x + 9} y={h - 10} text-anchor={'middle'} fill={'#ddd'}>
+              <text x={x} y={h - 10} text-anchor={'middle'} fill={'#ddd'}>
                 {hr}
               </text>
             )}
