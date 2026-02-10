@@ -1,12 +1,13 @@
 import type { UrlState } from '../url-handler.tsx';
-import { andThen, entriesOf, type Result, type State, twoDp } from '../ts.ts';
+import { andThen, entriesOf, type Result, type State } from '../ts.ts';
 import { useEffect, useState } from 'preact/hooks';
 import * as Papa from 'papaparse';
 import { BillView } from './bill-view.tsx';
+import { Temporal } from 'temporal-polyfill';
 
 export type LocalDate = `${number}-${number}-${number}`;
 
-export type ParsedBill = Record<LocalDate, number[]>;
+export type ParsedBill = Record<LocalDate, (number | undefined)[]>;
 
 export function BillAnalysis({ uss }: { uss: State<UrlState> }) {
   const [file, setFile] = useState<File | undefined>(undefined);
@@ -66,8 +67,8 @@ function parse(text: string): Result<ParsedBill> {
   for (const row of res.data as Record<string, string>[]) {
     // what a ballache
     const dateStr = row[dateCol].trim();
-    const dateVal = new Date(dateStr);
-    if (isNaN(dateVal.getTime())) {
+    const dateVal = parseDateHour(dateStr);
+    if (!dateVal) {
       return {
         success: false,
         error: new Error(
@@ -87,18 +88,17 @@ function parse(text: string): Result<ParsedBill> {
       };
     }
 
-    const dateWithoutHour = dateVal.toISOString().slice(0, 10) as LocalDate;
-    const hour = dateVal.getHours();
+    const [dateWithoutHour, hour] = dateVal;
     byDateHour[dateWithoutHour] ??= {};
     byDateHour[dateWithoutHour][hour] ??= 0;
     byDateHour[dateWithoutHour][hour] += floatVal;
   }
 
-  const value: Record<LocalDate, number[]> = {};
+  const value: ParsedBill = {};
   for (const [date, hourMap] of entriesOf(byDateHour)) {
-    const hourList = [];
+    const hourList: (number | undefined)[] = [];
     for (let hour = 0; hour < 24; hour++) {
-      hourList.push(twoDp(hourMap[hour] ?? 0));
+      hourList.push(hourMap[hour]);
     }
     value[date] = hourList;
   }
@@ -106,4 +106,28 @@ function parse(text: string): Result<ParsedBill> {
   console.log(value);
 
   return { success: true, value };
+}
+
+function parseLondon(str: string): Temporal.ZonedDateTime | undefined {
+  // as the Temporal parsers don't accept anything fnu
+  const instant = new Date(str).getTime();
+  if (isNaN(instant)) {
+    return undefined;
+  }
+
+  return Temporal.Instant.fromEpochMilliseconds(instant).toZonedDateTimeISO(
+    'Europe/London',
+  );
+}
+
+function toDateHour(zdt: Temporal.ZonedDateTime): [LocalDate, number] {
+  return [zdt.toPlainDate().toString() as LocalDate, zdt.hour];
+}
+
+export function parseDateHour(str: string): [LocalDate, number] | undefined {
+  const zdt = parseLondon(str);
+  if (!zdt) {
+    return undefined;
+  }
+  return toDateHour(zdt);
 }
