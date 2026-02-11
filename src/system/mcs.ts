@@ -1,4 +1,5 @@
 import tableRaw from '../assets/mcs.json';
+import { range, sum } from '../ts.ts';
 
 // size of the real array
 export const slopes = 91;
@@ -16,23 +17,42 @@ interface Zone {
   data: number[][];
 }
 
-export function findZone(loc: [number, number]): Zone {
+function interpTable(loc: [number, number]): [number, number[][]] {
   const [lat, lon] = loc;
-  let best = 0;
-  let bestDist = Infinity;
 
-  for (let i = 0; i < centres.length; i++) {
-    const [clat, clon] = centres[i];
-    const dist = Math.sqrt((lat - clat) ** 2 + (lon - clon) ** 2);
-    if (dist < bestDist) {
-      bestDist = dist;
-      best = i;
+  const dists = centres
+    .map(([lat2, lon2], i) => [(lat - lat2) ** 2 + (lon - lon2) ** 2, i])
+    .sort(([d1], [d2]) => d1 - d2);
+
+  const [bd, best] = dists[0];
+
+  // arbitrary
+  if (bd < 0.01) {
+    return [best, table[best]];
+  }
+
+  const using = dists.slice(0, 3);
+
+  const inversePowers = using.map(([d]) => 1 / d ** 2);
+  const totalWeight = sum(inversePowers);
+  const weights = inversePowers.map((w) => w / totalWeight);
+
+  const interp: number[][] = range(slopes).map(() => []);
+  for (let x = 0; x < slopes; x++) {
+    for (let y = 0; y < oris; y++) {
+      interp[x].push(sum(using.map(([, j], i) => weights[i] * table[j][x][y])));
     }
   }
+  return [best, interp];
+}
+
+export function findZone(loc: [number, number]): Zone {
+  const [best, data] = interpTable(loc);
+
   return {
     name: names[best],
     loc: centres[best],
-    data: table[best],
+    data,
   };
 }
 

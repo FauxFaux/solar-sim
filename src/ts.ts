@@ -36,6 +36,8 @@ export const twoDp = (n: number) => Math.round(n * 100) / 100;
 
 export const range = (n: number) => Array.from({ length: n }, (_, i) => i);
 
+export const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
+
 export type Result<T> =
   | { success: true; value: T }
   | { success: false; error: Error };
