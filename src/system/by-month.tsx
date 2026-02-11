@@ -59,11 +59,11 @@ export function ByMonth({ us }: { us: UrlState }) {
               fill={i === pointMonth ? '#cb4' : '#a29436'}
             >
               <title>
-                {cal[i]}: {v.toFixed(1)}%: {((gen * v) / 100).toFixed()}kWh/mo
+                {CAL[i]}: {v.toFixed(1)}%: {((gen * v) / 100).toFixed()}kWh/mo
               </title>
             </rect>
             <text x={vx + 9} y={h - 8} text-anchor={'middle'} fill={'#ddd'}>
-              {cal[i]}
+              {CAL[i]}
             </text>
             <circle
               cx={vx + 9}
@@ -92,7 +92,7 @@ export function ByMonth({ us }: { us: UrlState }) {
   );
 }
 
-const cal = 'JFMAMJJASOND';
+export const CAL = 'JFMAMJJASOND' as const;
 
 const byMo = [3.0, 4.5, 8.8, 11.0, 12.0, 13.5, 14.0, 11.5, 9.0, 6.0, 4.2, 2.5];
 

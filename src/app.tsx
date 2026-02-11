@@ -6,6 +6,7 @@ import { ConsumptionDesign } from './consumption';
 import { Temporal } from 'temporal-polyfill';
 import { useState } from 'preact/hooks';
 import { createContext } from 'preact';
+import { WorldDisplay } from './world';
 
 interface TransState {
   billPointy?: [Temporal.PlainDate, number];
@@ -23,6 +24,7 @@ export function App({ uss }: { uss: State<UrlState> }) {
       <HomeUsage uss={uss} />
       <SystemDesign uss={uss} />
       <ConsumptionDesign uss={uss} />
+      <WorldDisplay uss={uss} />
     </TransContext.Provider>
   );
 }
