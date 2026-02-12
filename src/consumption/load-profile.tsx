@@ -4,14 +4,14 @@ import { useState } from 'preact/hooks';
 import { FaBrush } from 'react-icons/fa6';
 import type { TargetedMouseEvent } from 'preact';
 
-export function LoadProfile({ uss: [us, setUs] }: { uss: State<UrlState> }) {
+export function LoadProfile({ uss: [us] }: { uss: State<UrlState> }) {
   const [grid, setGrid] = useState(familyHome.map((s) => s.split('')));
   const [brush, setBrush] = useState(1);
 
   const cw = 14;
 
   const th = 170;
-  const tw = cw * 24; // 24h, 336
+  // const tw = cw * 24; // 24h, 336
 
   const cells = 12; // arbitrary
   const ch = Math.floor(th / cells);

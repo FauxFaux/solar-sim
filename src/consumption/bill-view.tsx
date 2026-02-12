@@ -1,5 +1,5 @@
 import { Temporal } from 'temporal-polyfill';
-import { keysOf, range, type State } from '../ts.ts';
+import { keysOf, range } from '../ts.ts';
 import {
   dateRange,
   isSetAndFinite,

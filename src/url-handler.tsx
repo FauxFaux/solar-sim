@@ -64,10 +64,12 @@ export function UrlHandler() {
 
 function packUs(us: UrlState) {
   const data = deflateSync(strToU8(JSON.stringify(us)));
+  // @ts-expect-error (toBase64 is missing from Uint8Array typings)
   return data.toBase64({ alphabet: 'base64url' });
 }
 
 function unpackUs(hash: string): UrlState {
+  // @ts-expect-error (fromBase64 is missing from Uint8Array typings)
   const data = Uint8Array.fromBase64(hash.slice(1), { alphabet: 'base64url' });
   const str = strFromU8(inflateSync(data));
   return JSON.parse(str);

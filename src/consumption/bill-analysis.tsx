@@ -25,7 +25,7 @@ import type { ComponentChildren } from 'preact';
 import { TransContext } from '../app.tsx';
 import { Temporal } from 'temporal-polyfill';
 
-export function BillAnalysis({ uss }: { uss: State<UrlState> }) {
+export function BillAnalysis({ uss: _ }: { uss: State<UrlState> }) {
   const [file, setFile] = useState<File | undefined>(undefined);
   const [_ts, setTs] = useContext(TransContext);
 

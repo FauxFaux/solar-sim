@@ -48,6 +48,8 @@ async function pack() {
   for (let i = 0; i < chunked.length; i++) {
     writeFileSync(`../src/assets/meteo-${i}.json`, JSON.stringify(chunked[i]));
   }
+
+  return 0;
 }
 
 async function downloadRaw() {
