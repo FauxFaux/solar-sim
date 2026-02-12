@@ -2,10 +2,11 @@ import { findZone } from './mcs.ts';
 import { OrientationInfo } from './orientation-info.tsx';
 import type { UrlState } from '../url-handler.tsx';
 import type { State } from '../ts.ts';
+import { useMemo } from 'preact/hooks';
 
 export function OrientationPicker({ uss }: { uss: State<UrlState> }) {
   const [us, setUs] = uss;
-  const zone = findZone(us.loc);
+  const zone = useMemo(() => findZone(us.loc), [us.loc]);
   const [slope, ori] = us.ori;
   return (
     <div>

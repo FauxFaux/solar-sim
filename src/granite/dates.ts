@@ -42,3 +42,16 @@ export function parseDateHour(str: string): [LocalDate, number] | undefined {
   }
   return toDateHour(zdt);
 }
+
+export function allDatesInYear(year: number) {
+  let currentDate = Temporal.PlainDate.from({ year, month: 1, day: 1 });
+  const ret = [];
+
+  const days = currentDate.daysInYear;
+
+  for (let i = 0; i < days; i++) {
+    ret.push(currentDate);
+    currentDate = currentDate.add({ days: 1 });
+  }
+  return ret;
+}

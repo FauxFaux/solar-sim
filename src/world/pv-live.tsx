@@ -1,13 +1,13 @@
 import pvLive from '../assets/pv-live.json';
 import { type State } from '../ts.ts';
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { Temporal } from 'temporal-polyfill';
 import { dayNames } from '../consumption/bill-view.tsx';
 import { findMeteo } from './meteo.ts';
 import type { UrlState } from '../url-handler.tsx';
 import { Scrub } from './scrub.tsx';
-import { MONTH_NAMES } from '../granite/dates.ts';
+import { allDatesInYear, MONTH_NAMES } from '../granite/dates.ts';
 import { ordinal, sum } from '../granite/numbers.ts';
+import { Temporal } from 'temporal-polyfill';
 
 // data file has 16 hours of data, from 06:00 to 21:59.999; 0: 06:00, 1: 07:00, ..., 6: 12:00, ..., 15: 21:00
 
@@ -37,16 +37,6 @@ export function PvLive({ uss: [us] }: { uss: State<UrlState> }) {
   );
 }
 
-function makeAllDates() {
-  let currentDate = Temporal.PlainDate.from({ year: 2025, month: 1, day: 1 });
-  const ret = [];
-  for (let i = 0; i < 365; i++) {
-    ret.push(currentDate);
-    currentDate = currentDate.add({ days: 1 });
-  }
-  return ret;
-}
-
 function Zoomed({
   us,
   window: [ws, we],
@@ -65,7 +55,7 @@ function Zoomed({
 
   const meteo = useMemo(() => findMeteo(us.loc), [us.loc]);
 
-  const allDates = makeAllDates();
+  const allDates = allDatesInYear(2025);
 
   const windowRange = we - ws;
   const pointsPerDay = Math.min(pvLive[0].length, Math.ceil(w / windowRange));
@@ -91,21 +81,9 @@ function Zoomed({
   return (
     <svg width={w} height={h}>
       <polyline points={points.join(' ')} fill="#cb4" stroke="none" />
-      {shownDates.map((d, i) => {
-        if (shownDates.length >= 30 && d.dayOfWeek !== 1) return;
-        if (shownDates.length >= 90 && d.day > 7) return;
-        return (
-          <text
-            x={px + ((i + 0.5) / shownDates.length) * tw}
-            y={h - 15}
-            text-anchor={'middle'}
-            font-size={12}
-            fill={'#ccc'}
-          >
-            {dayNames[d.dayOfWeek - 1][0]}
-          </text>
-        );
-      })}
+      <g transform={`translate(${px},${h - 15})`}>
+        {legendaryDayNames(shownDates, tw)}
+      </g>
       {shownDates.map((d, i) => {
         return (
           <text
@@ -119,13 +97,54 @@ function Zoomed({
           </text>
         );
       })}
+      <g transform={`translate(${px},${h - 5})`}>
+        {legendaryDates(shownDates, tw)}
+      </g>
+      <g transform={`translate(${px},${pt})`}>
+        {legendarySegmentLines(shownDates, tw, th)}
+      </g>
+      {/* axes */}
+      <line x1={px - 4} x2={w} y1={pt + th} y2={pt + th} stroke="#cccccc88" />
+      <line
+        x1={px - 4}
+        x2={w}
+        y1={pt + th / 2}
+        y2={pt + th / 2}
+        stroke="#cccccc88"
+      />
+      <line x1={px - 4} x2={w} y1={pt} y2={pt} stroke="#cccccc88" />
+    </svg>
+  );
+}
+
+function legendaryDayNames(shownDates: Temporal.PlainDate[], tw: number) {
+  return shownDates.map((d, i) => {
+    if (shownDates.length >= 30 && d.dayOfWeek !== 1) return;
+    if (shownDates.length >= 90 && d.day > 7) return;
+    return (
+      <text
+        x={((i + 0.5) / shownDates.length) * tw}
+        y={0}
+        text-anchor={'middle'}
+        font-size={12}
+        fill={'#ccc'}
+      >
+        {dayNames[d.dayOfWeek - 1][0]}
+      </text>
+    );
+  });
+}
+
+function legendaryDates(shownDates: any[], tw: number) {
+  return (
+    <>
       {shownDates.map((d, i) => {
         if (d.day !== 1) return null;
         if (shownDates.length <= 14) return null;
         return (
           <text
-            x={px + (i / shownDates.length) * tw}
-            y={h - 5}
+            x={(i / shownDates.length) * tw}
+            y={0}
             text-anchor={'start'}
             font-size={10}
             fill={'#ccc'}
@@ -141,8 +160,8 @@ function Zoomed({
         if (shownDates.length <= 14) return null;
         return (
           <text
-            x={px + (i / shownDates.length) * tw}
-            y={h - 5}
+            x={(i / shownDates.length) * tw}
+            y={0}
             text-anchor={'start'}
             font-size={10}
             fill={'#ccc'}
@@ -152,14 +171,14 @@ function Zoomed({
         );
       })}
       {shownDates.length <= 14 && (
-        <text x={px} y={h - 5} fill={'#ccc'} font-size={10}>
+        <text x={0} y={0} fill={'#ccc'} font-size={10}>
           {ordinal(shownDates[0]?.day)} {MONTH_NAMES[shownDates[0]?.month - 1]}
         </text>
       )}
       {shownDates.length <= 14 && shownDates.length > 8 && (
         <text
-          x={px + (7.5 / shownDates.length) * tw}
-          y={h - 5}
+          x={(7.5 / shownDates.length) * tw}
+          y={0}
           fill={'#ccc'}
           font-size={10}
           text-anchor={'middle'}
@@ -167,55 +186,49 @@ function Zoomed({
           {ordinal(shownDates[7]?.day)} {MONTH_NAMES[shownDates[7]?.month - 1]}
         </text>
       )}
-      {shownDates.length <= 14 &&
-        shownDates.map((_, i) => {
-          // the start of the hour?
-          const hToX = (h: number) => (((h - 6) / 16) * tw) / shownDates.length;
-          return (
-            <g
-              transform={`translate (${px + (i / shownDates.length) * tw},${pt})`}
-            >
-              <line
-                x1={hToX(7)}
-                x2={hToX(7)}
-                y1={0}
-                y2={th + 2}
-                stroke="#cd32ff44"
-              />
-              <line
-                x1={hToX(10)}
-                x2={hToX(10)}
-                y1={0}
-                y2={th + 2}
-                stroke="#d4bc0e44"
-              />
-              <line
-                x1={hToX(16)}
-                x2={hToX(16)}
-                y1={0}
-                y2={th + 2}
-                stroke="#d4bc0e44"
-              />
-              <line
-                x1={hToX(19)}
-                x2={hToX(19)}
-                y1={0}
-                y2={th + 2}
-                stroke="#f0461744"
-              />
-            </g>
-          );
-        })}
-      <line x1={px - 4} x2={w} y1={pt + th} y2={pt + th} stroke="#cccccc88" />
-      <line
-        x1={px - 4}
-        x2={w}
-        y1={pt + th / 2}
-        y2={pt + th / 2}
-        stroke="#cccccc88"
-      />
-      <line x1={px - 4} x2={w} y1={pt} y2={pt} stroke="#cccccc88" />
-    </svg>
+    </>
+  );
+}
+
+function legendarySegmentLines(shownDates: any[], tw: number, th: number) {
+  if (shownDates.length > 14) return null;
+  return (
+    shownDates.map((_, i) => {
+      // the start of the hour?
+      const hToX = (h: number) => (((h - 6) / 16) * tw) / shownDates.length;
+      return (
+        <g transform={`translate (${(i / shownDates.length) * tw},0)`}>
+          <line
+            x1={hToX(7)}
+            x2={hToX(7)}
+            y1={0}
+            y2={th + 2}
+            stroke="#cd32ff44"
+          />
+          <line
+            x1={hToX(10)}
+            x2={hToX(10)}
+            y1={0}
+            y2={th + 2}
+            stroke="#d4bc0e44"
+          />
+          <line
+            x1={hToX(16)}
+            x2={hToX(16)}
+            y1={0}
+            y2={th + 2}
+            stroke="#d4bc0e44"
+          />
+          <line
+            x1={hToX(19)}
+            x2={hToX(19)}
+            y1={0}
+            y2={th + 2}
+            stroke="#f0461744"
+          />
+        </g>
+      );
+    })
   );
 }
 
