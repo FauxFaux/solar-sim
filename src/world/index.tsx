@@ -5,7 +5,7 @@ import { PvLive } from './pv-live.tsx';
 export function WorldDisplay({ uss }: { uss: State<UrlState> }) {
   return (
     <>
-      <PvLive />
+      <PvLive uss={uss} />
     </>
   );
 }

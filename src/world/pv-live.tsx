@@ -1,15 +1,17 @@
 import pvLive from '../assets/pv-live.json';
 import { range, type State, sum } from '../ts.ts';
 import { CAL } from '../system/by-month.tsx';
-import { useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Temporal } from 'temporal-polyfill';
 import { dayNames } from '../consumption/bill-view.tsx';
+import { findMeteo } from './meteo.ts';
+import type { UrlState } from '../url-handler.tsx';
 
 // data file has 16 hours of data, from 06:00 to 21:59.999; 0: 06:00, 1: 07:00, ..., 6: 12:00, ..., 15: 21:00
 
 const globalWindow = window;
 
-export function PvLive() {
+export function PvLive({ uss: [us] }: { uss: State<UrlState> }) {
   const [w, setW] = useState(350);
   const frameRef = useRef<HTMLDivElement>(null);
   const windows = useState([278, 285] as [number, number]);
@@ -28,7 +30,7 @@ export function PvLive() {
     <div style={'max-width: 780px'} ref={frameRef}>
       <h3>PV Live: {w}</h3>
       <Scrub windows={windows} w={w} />
-      <Zoomed window={window} w={w} />
+      <Zoomed us={us} window={window} w={w} />
     </div>
   );
 }
@@ -57,9 +59,11 @@ function ordinal(n: number): string {
 }
 
 function Zoomed({
+  us,
   window: [ws, we],
   w,
 }: {
+  us: UrlState;
   window: [number, number];
   w: number;
 }) {
@@ -69,6 +73,8 @@ function Zoomed({
   const px = 10;
   const th = h - pt - pb;
   const tw = w - 2 * px;
+
+  const meteo = useMemo(() => findMeteo(us.loc), [us.loc]);
 
   const allDates = makeAllDates();
 
@@ -108,6 +114,19 @@ function Zoomed({
             fill={'#ccc'}
           >
             {dayNames[d.dayOfWeek - 1][0]}
+          </text>
+        );
+      })}
+      {shownDates.map((d, i) => {
+        return (
+          <text
+            x={px + (i / shownDates.length) * tw}
+            y={pt + 8}
+            text-anchor={'start'}
+            font-size={10}
+            fill={'#ccc'}
+          >
+            {meteo.app[d.dayOfYear * 24 + 12]?.toFixed()}C
           </text>
         );
       })}
