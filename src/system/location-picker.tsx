@@ -1,7 +1,8 @@
 import type { UrlState } from '../url-handler.tsx';
-import { type State, twoDp } from '../ts.ts';
+import { type State } from '../ts.ts';
 import biMap from '../assets/bi-map.svg';
 import { PiSolarRoof } from 'react-icons/pi';
+import { twoDp } from '../granite/numbers.ts';
 
 export function LocationPicker({ uss: [us, setUs] }: { uss: State<UrlState> }) {
   const vstart = 49.95;

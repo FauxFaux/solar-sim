@@ -1,6 +1,6 @@
 // imported by scripts
 
-import { sum } from '../ts.ts';
+import { sum } from '../granite/numbers.ts';
 
 export const MCS_NAMES = [
   '1 - London',

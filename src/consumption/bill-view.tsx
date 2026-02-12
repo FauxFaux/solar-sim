@@ -1,12 +1,9 @@
 import { Temporal } from 'temporal-polyfill';
-import { keysOf, range } from '../ts.ts';
-import {
-  dateRange,
-  isSetAndFinite,
-  type LocalDate,
-  type ParsedBill,
-} from './bill.ts';
+import { keysOf } from '../ts.ts';
+import { dateRange, isSetAndFinite, type ParsedBill } from './bill.ts';
 import { useState } from 'preact/hooks';
+import type { LocalDate } from '../granite/dates.ts';
+import { range } from '../granite/numbers.ts';
 
 export function BillView({
   bill,

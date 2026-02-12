@@ -1,6 +1,6 @@
-import { range } from '../ts.ts';
 import { useContext } from 'preact/hooks';
-import { TransContext } from '../app.tsx';
+import { range } from '../granite/numbers.ts';
+import { TransContext } from '../trans.ts';
 
 export function ByHour({ kwp }: { kwp: number }) {
   const [ts] = useContext(TransContext);

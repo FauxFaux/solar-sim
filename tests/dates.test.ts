@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest';
-import { parseDateHour } from '../src/consumption/bill.ts';
+
+import { parseDateHour } from '../src/granite/dates.ts';
 
 it('parses octopus (winter)', () => {
   expect(parseDateHour('2025-03-05T00:00:00+00:00')).toMatchInlineSnapshot(`

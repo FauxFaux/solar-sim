@@ -3,26 +3,17 @@ import type { State } from './ts.ts';
 import { HomeUsage } from './usage';
 import { SystemDesign } from './system';
 import { ConsumptionDesign } from './consumption';
-import { Temporal } from 'temporal-polyfill';
 import { useState } from 'preact/hooks';
-import { createContext } from 'preact';
 import { WorldDisplay } from './world';
 import { FaCreativeCommons, FaCreativeCommonsBy } from 'react-icons/fa6';
 import { IconContext } from 'react-icons';
-
-interface TransState {
-  billPointy?: [Temporal.PlainDate, number];
-}
-
-export const TransContext = createContext<State<TransState>>(
-  undefined as unknown as State<TransState>,
-);
+import { TransContext as TransContext1, type TransState } from './trans.ts';
 
 export function App({ uss }: { uss: State<UrlState> }) {
   const tss: State<TransState> = useState({});
 
   return (
-    <TransContext.Provider value={tss}>
+    <TransContext1 value={tss}>
       <div id={'tiles'}>
         <HomeUsage uss={uss} />
         <SystemDesign uss={uss} />
@@ -30,7 +21,7 @@ export function App({ uss }: { uss: State<UrlState> }) {
         <WorldDisplay uss={uss} />
       </div>
       <Footer />
-    </TransContext.Provider>
+    </TransContext1>
   );
 }
 

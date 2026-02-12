@@ -1,8 +1,8 @@
-import { entriesOf, type Result, twoDp } from '../ts.ts';
+import { entriesOf, type Result } from '../ts.ts';
 import { Temporal } from 'temporal-polyfill';
 import * as Papa from 'papaparse';
-
-export type LocalDate = `${number}-${number}-${number}`;
+import { type LocalDate, parseDateHour } from '../granite/dates.ts';
+import { twoDp } from '../granite/numbers.ts';
 
 export type MaybeNumber = number | undefined | null;
 
@@ -76,30 +76,6 @@ export function parseBill(text: string): Result<ParsedBill> {
   }
 
   return { success: true, value };
-}
-
-function parseLondon(str: string): Temporal.ZonedDateTime | undefined {
-  // as the Temporal parsers don't accept anything fnu
-  const instant = new Date(str).getTime();
-  if (isNaN(instant)) {
-    return undefined;
-  }
-
-  return Temporal.Instant.fromEpochMilliseconds(instant).toZonedDateTimeISO(
-    'Europe/London',
-  );
-}
-
-function toDateHour(zdt: Temporal.ZonedDateTime): [LocalDate, number] {
-  return [zdt.toPlainDate().toString() as LocalDate, zdt.hour];
-}
-
-export function parseDateHour(str: string): [LocalDate, number] | undefined {
-  const zdt = parseLondon(str);
-  if (!zdt) {
-    return undefined;
-  }
-  return toDateHour(zdt);
 }
 
 export function dateRange(

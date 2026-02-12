@@ -1,5 +1,5 @@
 import { deltaDecode, interpLoc } from '../system/mcs-meta.ts';
-import { range, sum } from '../ts.ts';
+import { range, sum } from '../granite/numbers.ts';
 
 const meteos = (
   [

@@ -1,4 +1,3 @@
-import { range, sum } from '../ts.ts';
 import {
   MCS_ZONE_CENTRES,
   MCS_NAMES,
@@ -6,6 +5,7 @@ import {
   deltaDecode,
   interpLoc,
 } from './mcs-meta.ts';
+import { range, sum } from '../granite/numbers.ts';
 
 // code splitting
 const tableRaw = (await import('../assets/mcs.json')).default;

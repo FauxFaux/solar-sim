@@ -7,6 +7,7 @@
     "format": "prettier --log-level warn --write .",
     "dev": "vite",
     "test": "vitest",
+    "circular": "madge --circular --extensions ts,tsx src",
     "analyze": "ANALYZE=true vite build",
     "build": "vite build"
   },
@@ -22,6 +23,7 @@
     "@preact/preset-vite": "^2",
     "@types/node": "^24",
     "@types/papaparse": "^5",
+    "madge": "^8",
     "prettier": "~3.8",
     "typescript": "~5.9",
     "vite": "^7",

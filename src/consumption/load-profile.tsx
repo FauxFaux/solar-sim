@@ -1,8 +1,9 @@
-import { range, type State } from '../ts.ts';
+import { type State } from '../ts.ts';
 import type { UrlState } from '../url-handler.tsx';
 import { useState } from 'preact/hooks';
 import { FaBrush } from 'react-icons/fa6';
 import type { TargetedMouseEvent } from 'preact';
+import { range } from '../granite/numbers.ts';
 
 export function LoadProfile({ uss: [us] }: { uss: State<UrlState> }) {
   const [grid, setGrid] = useState(familyHome.map((s) => s.split('')));

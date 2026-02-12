@@ -2,7 +2,8 @@ import type { UrlState } from '../url-handler.tsx';
 import { findZone } from './mcs.ts';
 import { heatCalculation } from '../usage/heating.tsx';
 import { useContext } from 'preact/hooks';
-import { TransContext } from '../app.tsx';
+import { CAL } from '../granite/dates.ts';
+import { TransContext } from '../trans.ts';
 
 export function ByMonth({ us }: { us: UrlState }) {
   const [ts] = useContext(TransContext);
@@ -91,8 +92,6 @@ export function ByMonth({ us }: { us: UrlState }) {
     </svg>
   );
 }
-
-export const CAL = 'JFMAMJJASOND' as const;
 
 const byMo = [3.0, 4.5, 8.8, 11.0, 12.0, 13.5, 14.0, 11.5, 9.0, 6.0, 4.2, 2.5];
 
