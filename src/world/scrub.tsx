@@ -122,7 +122,7 @@ export function Scrub({
     >
       {/*<rect x={px} y={py} width={tw} height={th} fill="#444" />*/}
       <polyline points={points.join(' ')} fill="#cb4" stroke="none" />
-      <g style={'pointer-events: none; user-select: none'}>
+      <g style={{ 'user-select': 'none' }}>
         {range(12).map((i) => (
           <text
             x={px + ((i + 0.5) / 12) * tw}

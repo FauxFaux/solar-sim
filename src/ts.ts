@@ -44,3 +44,7 @@ export function andThen<T>(
     .then((r) => set(r))
     .catch((error) => set({ success: false, error }));
 }
+
+export function rotate<T>(arr: T[], n: number) {
+  return arr.slice(n).concat(arr.slice(0, n));
+}

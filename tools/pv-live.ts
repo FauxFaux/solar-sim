@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { writeFileSync } from 'node:fs';
 
 async function main() {
-  const datums = readFileSync('./2026-02-07-pv-live.csv', 'utf-8')
+  const datums = readFileSync('./2025-01-01-pv-live.csv', 'utf-8')
     .split('\n')
     .slice(1)
     .map((line) => {
@@ -37,14 +37,7 @@ async function main() {
       row[i] = Math.round((row[i] / max) * 1000);
     }
   }
-  writeFileSync(
-    '../src/assets/pv-live.json',
-    JSON.stringify(rotate(doc, 365 - 31 - 7)),
-  );
-}
-
-function rotate<T>(arr: T[], n: number) {
-  return arr.slice(n).concat(arr.slice(0, n));
+  writeFileSync('../src/assets/pv-live.json', JSON.stringify(doc));
 }
 
 await main();

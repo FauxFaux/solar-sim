@@ -1,13 +1,13 @@
 import pvLive from '../assets/pv-live.json';
 import { type State } from '../ts.ts';
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { dayNames } from '../consumption/bill-view.tsx';
 import { findMeteo } from './meteo.ts';
 import type { UrlState } from '../url-handler.tsx';
 import { Scrub } from './scrub.tsx';
-import { allDatesInYear, MONTH_NAMES } from '../granite/dates.ts';
+import { allDatesInYear, DAY_NAMES, MONTH_NAMES } from '../granite/dates.ts';
 import { ordinal, sum } from '../granite/numbers.ts';
 import { Temporal } from 'temporal-polyfill';
+import { chunks } from '../system/mcs-meta.ts';
 
 // data file has 16 hours of data, from 06:00 to 21:59.999; 0: 06:00, 1: 07:00, ..., 6: 12:00, ..., 15: 21:00
 
@@ -37,6 +37,34 @@ export function PvLive({ uss: [us] }: { uss: State<UrlState> }) {
   );
 }
 
+function pointsFor(
+  toGraph: number[][],
+  ws: number,
+  we: number,
+  tw: number,
+  th: number,
+) {
+  const windowRange = we - ws;
+  const pointsPerDay = Math.min(toGraph[0].length, Math.ceil(tw / windowRange));
+
+  const allPoints = toGraph.flatMap((d) => downsample(d, pointsPerDay));
+
+  const ds = Math.floor(ws) * pointsPerDay;
+  const de = Math.ceil(we) * pointsPerDay;
+  const shownPoints = allPoints.slice(ds, de);
+
+  const points = shownPoints.map(
+    (p, i, arr) =>
+      `${(i / arr.length) * tw},${(1 - p / Math.max(...allPoints)) * th}`,
+  );
+
+  // close the loop
+  points.unshift(`0,${th}`);
+  points.push(`${tw},${th}`);
+
+  return points;
+}
+
 function Zoomed({
   us,
   window: [ws, we],
@@ -46,81 +74,92 @@ function Zoomed({
   window: [number, number];
   w: number;
 }) {
-  const h = 100;
+  const h = 200;
   const pt = 10;
   const pb = 30;
   const px = 10;
   const th = h - pt - pb;
   const tw = w - 2 * px;
+  // positive
+  const thp = 0.8 * th;
 
   const meteo = useMemo(() => findMeteo(us.loc), [us.loc]);
 
   const allDates = allDatesInYear(2025);
 
-  const windowRange = we - ws;
-  const pointsPerDay = Math.min(pvLive[0].length, Math.ceil(w / windowRange));
+  const solarGraph = pvLive.map((v) => [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    ...v.map((v) => v / 1000),
+    0,
+    0,
+    0,
+  ]);
+  // const points = pointsFor(toGraph, ws, we, tw, th);
+  const meteoApp = chunks(meteo.app, 24);
+  const meteoRad = chunks(meteo.rad, 24);
 
-  const allPoints = pvLive
-    .map((v) => v.map((v) => v / 1000))
-    .flatMap((d) => downsample(d, pointsPerDay));
+  const solarPoints = pointsFor(solarGraph, ws, we, tw, thp);
+  const meteoAppPoints = pointsFor(meteoApp, ws, we, tw, thp);
+  const meteoRadPoints = pointsFor(meteoRad, ws, we, tw, thp);
 
-  const ds = Math.floor(ws) * pointsPerDay;
-  const de = Math.ceil(we) * pointsPerDay;
-  const shownPoints = allPoints.slice(ds, de);
   const shownDates = allDates.slice(Math.floor(ws), Math.ceil(we));
 
-  const points = shownPoints.map(
-    (p, i, arr) =>
-      `${px + (i / arr.length) * tw},${pt + (1 - p / Math.max(...allPoints)) * th}`,
-  );
-
-  // close the loop
-  points.unshift(`${px},${pt + th}`);
-  points.push(`${px + tw},${pt + th}`);
-
   return (
-    <svg width={w} height={h}>
-      <polyline points={points.join(' ')} fill="#cb4" stroke="none" />
-      <g transform={`translate(${px},${h - 15})`}>
-        {legendaryDayNames(shownDates, tw)}
-      </g>
-      {shownDates.map((d, i) => {
-        return (
-          <text
-            x={px + (i / shownDates.length) * tw}
-            y={pt + 8}
-            text-anchor={'start'}
-            font-size={10}
-            fill={'#ccc'}
-          >
-            {meteo.app[d.dayOfYear * 24 + 12]?.toFixed()}C
-          </text>
-        );
-      })}
-      <g transform={`translate(${px},${h - 5})`}>
-        {legendaryDates(shownDates, tw)}
-      </g>
+    <svg width={w} height={h} style={{ 'user-select': 'none' }}>
       <g transform={`translate(${px},${pt})`}>
         {legendarySegmentLines(shownDates, tw, th)}
       </g>
-      {/* axes */}
-      <line x1={px - 4} x2={w} y1={pt + th} y2={pt + th} stroke="#cccccc88" />
-      <line
-        x1={px - 4}
-        x2={w}
-        y1={pt + th / 2}
-        y2={pt + th / 2}
-        stroke="#cccccc88"
-      />
-      <line x1={px - 4} x2={w} y1={pt} y2={pt} stroke="#cccccc88" />
+
+      <g transform={`translate(${px},${pt})`}>
+        <polyline
+          points={meteoRadPoints.join(' ')}
+          fill={'#cb4'}
+          stroke="none"
+        />
+      </g>
+
+      <g transform={`translate(${px},${pt})`}>
+        <polyline
+          points={meteoAppPoints.join(' ')}
+          fill={'#84cb'}
+          stroke="none"
+        />
+      </g>
+
+      <g transform={`translate(${px},${pt})`}>
+        <polyline
+          points={solarPoints.slice(1, -1).join(' ')}
+          fill="none"
+          stroke={'#4ca'}
+          stroke-dasharray="5, 5"
+        />
+
+        <line x1={-4} x2={w} y1={thp} y2={thp} stroke="#cccccc88" />
+        <line x1={-4} x2={w} y1={thp / 2} y2={thp / 2} stroke="#cccccc88" />
+        <line x1={-4} x2={w} y1={0} y2={0} stroke="#cccccc88" />
+      </g>
+
+      <g transform={`translate(${px},${h - 15})`}>
+        {legendaryDayNames(shownDates, tw)}
+      </g>
+      <g transform={`translate(${px},${h - 5})`}>
+        {legendaryDates(shownDates, tw)}
+      </g>
     </svg>
   );
 }
 
 function legendaryDayNames(shownDates: Temporal.PlainDate[], tw: number) {
+  const dw = tw / shownDates.length;
   return shownDates.map((d, i) => {
-    if (shownDates.length >= 30 && d.dayOfWeek !== 1) return;
-    if (shownDates.length >= 90 && d.day > 7) return;
+    if (dw < 12 && d.dayOfWeek !== 1) return;
+    if (dw < 6 && d.day > 7) return;
+    const dayName = DAY_NAMES[d.dayOfWeek - 1];
     return (
       <text
         x={((i + 0.5) / shownDates.length) * tw}
@@ -129,107 +168,71 @@ function legendaryDayNames(shownDates: Temporal.PlainDate[], tw: number) {
         font-size={12}
         fill={'#ccc'}
       >
-        {dayNames[d.dayOfWeek - 1][0]}
+        {dw > 35 ? dayName : dayName[0]}
       </text>
     );
   });
 }
 
-function legendaryDates(shownDates: any[], tw: number) {
-  return (
-    <>
-      {shownDates.map((d, i) => {
-        if (d.day !== 1) return null;
-        if (shownDates.length <= 14) return null;
-        return (
-          <text
-            x={(i / shownDates.length) * tw}
-            y={0}
-            text-anchor={'start'}
-            font-size={10}
-            fill={'#ccc'}
-          >
-            {shownDates.length <= 365 / 2 ? '1st' : ''}{' '}
-            {MONTH_NAMES[d.month - 1]}
-          </text>
-        );
-      })}
-      {shownDates.map((d, i) => {
-        if (d.day !== 15) return null;
-        if (shownDates.length >= 90) return null;
-        if (shownDates.length <= 14) return null;
-        return (
-          <text
-            x={(i / shownDates.length) * tw}
-            y={0}
-            text-anchor={'start'}
-            font-size={10}
-            fill={'#ccc'}
-          >
-            15th {MONTH_NAMES[d.month - 1]}
-          </text>
-        );
-      })}
-      {shownDates.length <= 14 && (
-        <text x={0} y={0} fill={'#ccc'} font-size={10}>
-          {ordinal(shownDates[0]?.day)} {MONTH_NAMES[shownDates[0]?.month - 1]}
-        </text>
-      )}
-      {shownDates.length <= 14 && shownDates.length > 8 && (
-        <text
-          x={(7.5 / shownDates.length) * tw}
-          y={0}
-          fill={'#ccc'}
-          font-size={10}
-          text-anchor={'middle'}
-        >
-          {ordinal(shownDates[7]?.day)} {MONTH_NAMES[shownDates[7]?.month - 1]}
-        </text>
-      )}
-    </>
+function legendaryDates(shownDates: Temporal.PlainDate[], tw: number) {
+  const dw = tw / shownDates.length;
+  if (dw < 1.5) return;
+
+  const withDay = (d: Temporal.PlainDate, i: number) => (
+    <text
+      x={((i + 0.5) / shownDates.length) * tw}
+      y={0}
+      text-anchor={'middle'}
+      font-size={10}
+      fill={'#ccc'}
+    >
+      {ordinal(d.day)} {MONTH_NAMES[d.month - 1]}
+    </text>
   );
+
+  const show = (d: Temporal.PlainDate) => {
+    if (dw > 55) return true;
+    if (dw > 15) return d.dayOfWeek === 1 || d.dayOfWeek === 4;
+    if (dw > 6) return d.dayOfWeek === 1;
+    return d.dayOfWeek === 1 && d.day <= 7;
+  };
+
+  return shownDates.map((d, i) => (show(d) ? withDay(d, i) : null));
 }
 
 function legendarySegmentLines(shownDates: any[], tw: number, th: number) {
-  if (shownDates.length > 14) return null;
-  return (
-    shownDates.map((_, i) => {
-      // the start of the hour?
-      const hToX = (h: number) => (((h - 6) / 16) * tw) / shownDates.length;
-      return (
-        <g transform={`translate (${(i / shownDates.length) * tw},0)`}>
-          <line
-            x1={hToX(7)}
-            x2={hToX(7)}
-            y1={0}
-            y2={th + 2}
-            stroke="#cd32ff44"
-          />
-          <line
-            x1={hToX(10)}
-            x2={hToX(10)}
-            y1={0}
-            y2={th + 2}
-            stroke="#d4bc0e44"
-          />
-          <line
-            x1={hToX(16)}
-            x2={hToX(16)}
-            y1={0}
-            y2={th + 2}
-            stroke="#d4bc0e44"
-          />
-          <line
-            x1={hToX(19)}
-            x2={hToX(19)}
-            y1={0}
-            y2={th + 2}
-            stroke="#f0461744"
-          />
-        </g>
-      );
-    })
-  );
+  const dw = tw / shownDates.length;
+  if (dw < 30) return [];
+  return shownDates.map((_, i) => {
+    // the start of the hour?
+    const hToX = (h: number) => (((h - 6) / 16) * tw) / shownDates.length;
+    return (
+      <g transform={`translate (${(i / shownDates.length) * tw},0)`}>
+        <line x1={hToX(7)} x2={hToX(7)} y1={0} y2={th + 2} stroke="#cd32ff44" />
+        <line
+          x1={hToX(10)}
+          x2={hToX(10)}
+          y1={0}
+          y2={th + 2}
+          stroke="#d4bc0e44"
+        />
+        <line
+          x1={hToX(16)}
+          x2={hToX(16)}
+          y1={0}
+          y2={th + 2}
+          stroke="#d4bc0e44"
+        />
+        <line
+          x1={hToX(19)}
+          x2={hToX(19)}
+          y1={0}
+          y2={th + 2}
+          stroke="#f0461744"
+        />
+      </g>
+    );
+  });
 }
 
 function downsample(arr: number[], targetPoints: number) {
