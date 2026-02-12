@@ -30,6 +30,19 @@ function makeAllDates() {
   return ret;
 }
 
+function ordinal(n: number): string {
+  switch (n % 10) {
+    case 1:
+      return n + 'st';
+    case 2:
+      return n + 'nd';
+    case 3:
+      return n + 'rd';
+    default:
+      return n + 'th';
+  }
+}
+
 function Zoomed({ window: [ws, we] }: { window: [number, number] }) {
   const w = 350;
   const h = 100;
@@ -82,6 +95,7 @@ function Zoomed({ window: [ws, we] }: { window: [number, number] }) {
       })}
       {shownDates.map((d, i) => {
         if (d.day !== 1) return null;
+        if (shownDates.length <= 14) return null;
         return (
           <text
             x={px + (i / shownDates.length) * tw}
@@ -90,13 +104,15 @@ function Zoomed({ window: [ws, we] }: { window: [number, number] }) {
             font-size={10}
             fill={'#ccc'}
           >
-            1st {monthNames[d.month - 1]}
+            {shownDates.length <= 365 / 2 ? '1st' : ''}{' '}
+            {monthNames[d.month - 1]}
           </text>
         );
       })}
       {shownDates.map((d, i) => {
         if (d.day !== 15) return null;
         if (shownDates.length >= 90) return null;
+        if (shownDates.length <= 14) return null;
         return (
           <text
             x={px + (i / shownDates.length) * tw}
@@ -109,6 +125,22 @@ function Zoomed({ window: [ws, we] }: { window: [number, number] }) {
           </text>
         );
       })}
+      {shownDates.length <= 14 && (
+        <text x={px} y={h - 5} fill={'#ccc'} font-size={10}>
+          {ordinal(shownDates[0]?.day)} {monthNames[shownDates[0]?.month - 1]}
+        </text>
+      )}
+      {shownDates.length <= 14 && shownDates.length > 8 && (
+        <text
+          x={px + (7.5 / shownDates.length) * tw}
+          y={h - 5}
+          fill={'#ccc'}
+          font-size={10}
+          text-anchor={'middle'}
+        >
+          {ordinal(shownDates[7]?.day)} {monthNames[shownDates[7]?.month - 1]}
+        </text>
+      )}
       {shownDates.length <= 14 &&
         shownDates.map((_, i) => {
           // the start of the hour?
@@ -202,11 +234,16 @@ function Scrub({
         const delta = Math.sign(e.deltaY) || Math.sign(e.deltaX);
         if (delta === 0) return;
         if (ws > we) return;
-        const width = we - ws;
-        const speed = 1;
-        const nudge = delta * width * speed;
-        const ns = ws + nudge;
-        const ne = we + nudge;
+        const width = Math.round(we - ws);
+        let ns = ws;
+        let ne = we;
+        if (e.altKey) {
+          ne += delta;
+        } else {
+          const nudge = Math.round(delta * (e.shiftKey ? 1 : width));
+          ns = Math.round(ws + nudge * (e.altKey ? -1 : 1));
+          ne = Math.round(we + nudge);
+        }
         if (ns < 0 || ne > days) return;
         setWindow([ns, ne]);
         e.preventDefault();
@@ -256,8 +293,8 @@ function Scrub({
               // const ne = nd + (r - l) / 2;
               // return [wrap(ns), wrap(ne)];
 
-              const ns = nd - (we - ws) / 2;
-              const ne = nd + (we - ws) / 2;
+              const ns = Math.round(nd - (we - ws) / 2);
+              const ne = Math.round(nd + (we - ws) / 2);
               if (ns < 0) {
                 return [0, we - ws];
               } else if (ne > days) {
