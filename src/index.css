@@ -63,7 +63,7 @@ body {
   flex-wrap: wrap;
   width: 100%;
   gap: 2em;
-  margin: 1em auto;
+  margin: 3em auto 80vh;
   font-size: 80%;
   color: #ccc;
 }
