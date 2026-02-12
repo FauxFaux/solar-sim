@@ -1,21 +1,34 @@
 import pvLive from '../assets/pv-live.json';
 import { range, type State, sum } from '../ts.ts';
 import { CAL } from '../system/by-month.tsx';
-import { useState } from 'preact/hooks';
+import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { Temporal } from 'temporal-polyfill';
 import { dayNames } from '../consumption/bill-view.tsx';
 
 // data file has 16 hours of data, from 06:00 to 21:59.999; 0: 06:00, 1: 07:00, ..., 6: 12:00, ..., 15: 21:00
 
+const globalWindow = window;
+
 export function PvLive() {
+  const [w, setW] = useState(350);
+  const frameRef = useRef<HTMLDivElement>(null);
   const windows = useState([278, 285] as [number, number]);
   const [window] = windows;
 
+  useLayoutEffect(() => {
+    const measure = () => {
+      setW(Math.floor(frameRef.current?.getBoundingClientRect().width ?? 350));
+    };
+    measure();
+    globalWindow.addEventListener('resize', measure);
+    return () => globalWindow.removeEventListener('resize', measure);
+  }, []);
+
   return (
-    <div>
-      <h3>PV Live</h3>
-      <Scrub windows={windows} />
-      <Zoomed window={window} />
+    <div style={'max-width: 780px'} ref={frameRef}>
+      <h3>PV Live: {w}</h3>
+      <Scrub windows={windows} w={w} />
+      <Zoomed window={window} w={w} />
     </div>
   );
 }
@@ -43,8 +56,13 @@ function ordinal(n: number): string {
   }
 }
 
-function Zoomed({ window: [ws, we] }: { window: [number, number] }) {
-  const w = 350;
+function Zoomed({
+  window: [ws, we],
+  w,
+}: {
+  window: [number, number];
+  w: number;
+}) {
   const h = 100;
   const pt = 10;
   const pb = 30;
@@ -195,8 +213,10 @@ function Zoomed({ window: [ws, we] }: { window: [number, number] }) {
 
 function Scrub({
   windows: [window, setWindow],
+  w,
 }: {
   windows: State<[number, number]>;
+  w: number;
 }) {
   const [holding, setHolding] = useState<
     ['s' | 'e' | 'm', initialOff: number] | null
@@ -207,7 +227,6 @@ function Scrub({
 
   const max = Math.max(...byDay);
 
-  const w = 350;
   const h = 100;
   const py = 20;
   const px = 10;
