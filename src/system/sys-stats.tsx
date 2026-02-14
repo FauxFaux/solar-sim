@@ -8,7 +8,7 @@ export function SysStats({ uss: [us] }: { uss: State<UrlState> }) {
   const zone = findZone(us.loc);
   const [slope, ori] = us.ori;
   const mcs = zone.data;
-  const mcsV = mcs[slope]?.[Math.round(ori / 5)];
+  const mcsV = mcs[slope]?.[Math.round(Math.abs(ori) / 5)];
   const gen = mcsV * us.kwp;
 
   // CITATION NEEDED

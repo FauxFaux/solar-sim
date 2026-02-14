@@ -12,7 +12,7 @@ export function ByMonth({ us }: { us: UrlState }) {
   const zone = findZone(us.loc);
   const [slope, ori] = us.ori;
   const mcs = zone.data;
-  const gen = mcs[slope]?.[Math.round(ori / 5)] * us.kwp;
+  const gen = mcs[slope]?.[Math.round(Math.abs(ori) / 5)] * us.kwp;
   const flatUsagePerc = (us.hub / gen) * 12;
 
   const ox = 60;

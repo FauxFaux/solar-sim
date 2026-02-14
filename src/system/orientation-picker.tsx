@@ -25,10 +25,34 @@ export function OrientationPicker({ uss }: { uss: State<UrlState> }) {
         kWp installed panels
       </p>
       <OrientationInfo mcs={zone.data} uss={uss} />
-      <p>
-        {slope}° from horizontal, {ori}° from south
-      </p>
-      <p>MCS zone: {zone.name}</p>
+      <div>
+        {slope}° <abbr title={'from horizontal'}>tilt</abbr>, facing{' '}
+        {compassName(ori)} ({ori}° from S)
+      </div>
+      <div>MCS zone: {zone.name}</div>
     </div>
   );
+}
+
+export function compassName(ori: number) {
+  const dirs = [
+    'N',
+    'NNE',
+    'NE',
+    'ENE',
+    'E',
+    'ESE',
+    'SE',
+    'SSE',
+    'S',
+    'SSW',
+    'SW',
+    'WSW',
+    'W',
+    'WNW',
+    'NW',
+    'NNW',
+  ];
+  const idx = Math.round(((ori + 180) % 360) / 22.5) % 16;
+  return dirs[idx];
 }

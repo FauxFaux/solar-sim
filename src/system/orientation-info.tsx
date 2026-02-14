@@ -2,6 +2,7 @@ import { type State } from '../ts.ts';
 import type { UrlState } from '../url-handler.tsx';
 import { oris, slopes } from './mcs.ts';
 import { range } from '../granite/numbers.ts';
+import { compassName } from './orientation-picker.tsx';
 
 export function OrientationInfo({
   mcs,
@@ -11,25 +12,25 @@ export function OrientationInfo({
   uss: State<UrlState>;
 }) {
   const w = 350;
-  const h = 380;
+  const h = 310;
   const tw = 330;
-  const th = 350;
+  const twh = tw / 2;
+  const th = h - 30;
+  const ox = w - tw;
 
   const min = 204;
   const max = 1132;
   const norm = (n: number) => (n - min) / (max - min);
 
-  const oticks = 6;
+  const oticks = 8;
   const sticks = 4;
 
   const [slope, ori] = us.ori;
 
   const setFromEvent = (x: number, y: number) => {
     const slope = Math.min(Math.round((y / th) * slopes), slopes - 1);
-    const ori = Math.max(
-      0,
-      Math.min(Math.round(((x - (w - tw)) / tw) * oris) * (180 / oris), 175),
-    );
+    let ori = -Math.round(((x - ox) / tw - 0.5) * oris * 2) * (180 / oris);
+    ori = Math.max(-175, Math.min(175, ori));
 
     setUs((us) => ({ ...us, ori: [slope, ori] }));
   };
@@ -52,17 +53,18 @@ export function OrientationInfo({
         e.preventDefault();
       }}
     >
-      <g transform={`translate(${w - tw} 0)`}>
+      <g transform={`translate(${ox} 0)`}>
         {range(slopes).map((slope) =>
-          range(oris).map((ori) => {
+          range(oris * 2).map((oriX) => {
+            const ori = oriX < oris ? oris - oriX - 1 : oriX - oris;
             const n = mcs[slope][ori];
             return (
               <rect
-                key={`${slope}-${ori}`}
-                x={(ori * tw) / oris}
+                key={`${slope}-${oriX}`}
+                x={(oriX * twh) / oris}
                 y={(slope * th) / slopes}
-                width={350 / oris}
-                height={424 / slopes}
+                width={w / oris}
+                height={h / slopes}
                 fill={`hsl(${Math.pow(norm(n), 1.4) * 120},80%,40%)`}
               />
             );
@@ -74,10 +76,10 @@ export function OrientationInfo({
           fill={'white'}
           text-anchor={'middle'}
           key={i}
-          x={w - tw + (i * w) / oticks}
+          x={ox + (i * tw) / oticks}
           y={h - 10}
         >
-          {((i * 180) / oticks).toFixed(0)}°
+          {compassName(-((i - oticks / 2) * 360) / oticks)}
         </text>
       ))}
       {range(sticks + 1).map((i) => {
@@ -108,7 +110,7 @@ export function OrientationInfo({
         );
       })}
       <circle
-        cx={(ori / 180) * tw + w - tw}
+        cx={ox + ((-ori / 180) * tw) / 2 + tw / 2}
         cy={(slope / slopes) * th}
         r={10}
         fill={'#6464f4'}

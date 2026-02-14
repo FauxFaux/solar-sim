@@ -51,11 +51,11 @@ function pointsFor(
 
   const ds = Math.floor(ws) * pointsPerDay;
   const de = Math.ceil(we) * pointsPerDay;
+  const maxOfAll = Math.max(...allPoints);
   const shownPoints = allPoints.slice(ds, de);
 
   const points = shownPoints.map(
-    (p, i, arr) =>
-      `${(i / arr.length) * tw},${(1 - p / Math.max(...allPoints)) * th}`,
+    (p, i, arr) => `${(i / arr.length) * tw},${(1 - p / maxOfAll) * th}`,
   );
 
   // close the loop
@@ -100,12 +100,15 @@ function Zoomed({
     0,
   ]);
   // const points = pointsFor(toGraph, ws, we, tw, th);
-  const meteoApp = chunks(meteo.app, 24);
-  const meteoRad = chunks(meteo.rad, 24);
+
+  const [meteoAppPoints, meteoRadPoints] = useMemo(() => {
+    return [
+      pointsFor(chunks(meteo.app, 24), ws, we, tw, thp),
+      pointsFor(chunks(meteo.rad, 24), ws, we, tw, thp),
+    ];
+  }, [meteo, ws, we, tw]);
 
   const solarPoints = pointsFor(solarGraph, ws, we, tw, thp);
-  const meteoAppPoints = pointsFor(meteoApp, ws, we, tw, thp);
-  const meteoRadPoints = pointsFor(meteoRad, ws, we, tw, thp);
 
   const shownDates = allDates.slice(Math.floor(ws), Math.ceil(we));
 
