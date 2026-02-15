@@ -1,0 +1,1 @@
+`for f in *.json; do <$f jq -c 'del(.hourly.time)' | sponge $f; done`

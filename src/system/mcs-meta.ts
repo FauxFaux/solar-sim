@@ -91,10 +91,9 @@ export function interpLoc(
 ): [idx: number, weight: number][] {
   const [lat, lon] = loc;
 
-  const dists = MCS_ZONE_CENTRES.map(([lat2, lon2], i) => [
-    (lat - lat2) ** 2 + (lon - lon2) ** 2,
-    i,
-  ]).sort(([d1], [d2]) => d1 - d2);
+  const dists = MCS_ZONE_CENTRES.map(
+    ([lat2, lon2], i) => [(lat - lat2) ** 2 + (lon - lon2) ** 2, i] as const,
+  ).sort(([d1], [d2]) => d1 - d2);
 
   const [bd, best] = dists[0];
 

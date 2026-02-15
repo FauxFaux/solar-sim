@@ -83,7 +83,7 @@ function Zoomed({
   // positive
   const thp = 0.8 * th;
 
-  const meteo = useMemo(() => findMeteo(us.loc), [us.loc]);
+  const meteo = useMemo(() => findMeteo(us.loc, us.ori), [us.loc, us.ori]);
 
   const allDates = allDatesInYear(2025);
 

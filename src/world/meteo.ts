@@ -1,27 +1,72 @@
-import { deltaDecode, interpLoc } from '../system/mcs-meta.ts';
+import {
+  deltaDecode,
+  interpLoc,
+  MCS_ZONE_CENTRES,
+} from '../system/mcs-meta.ts';
 import { range, sum } from '../granite/numbers.ts';
+import { METEO_HOURS, METEO_ORIS } from './meteo-meta.ts';
 
 const meteos = (
-  [
-    ...(await import('../assets/meteo-0.json')).default,
-    ...(await import('../assets/meteo-1.json')).default,
-    ...(await import('../assets/meteo-2.json')).default,
-    ...(await import('../assets/meteo-3.json')).default,
-    ...(await import('../assets/meteo-4.json')).default,
-  ] as { temp: number[]; app: number[]; rad: number[] }[]
-).map(({ temp, app, rad }) => {
-  const detemp = deltaDecode(temp);
-  return {
-    temp: detemp,
-    app: deltaDecode(app).map((a, i) => a + detemp[i]),
-    rad: deltaDecode(rad),
-  };
-});
+  await Promise.all(
+    range(MCS_ZONE_CENTRES.length).map(
+      (zone) => import(`../assets/meteo-${zone}.json`),
+    ),
+  )
+)
+  .map((v) => v.default as { temp: number[]; app: number[]; rads: number[][] })
+  .map(({ temp, app, rads }) => {
+    const detemp = deltaDecode(temp);
+    return {
+      temp: detemp,
+      app: deltaDecode(app).map((a, i) => a + detemp[i]),
+      rads: rads.map((rad) => deltaDecode(rad)),
+    };
+  });
 
-export const METEO_HOURS = 24 * 365;
-
-export function findMeteo(loc: [number, number]) {
+export function findMeteo(
+  loc: [number, number],
+  [slope, ori]: [number, number],
+) {
   const weights = interpLoc(loc);
+
+  const slopeWeight = slope / 90;
+
+  const oriFac = (180 + ori) / 45;
+  const lowOri = Math.floor(oriFac);
+  const highOri = lowOri + 1;
+  const oriWeight = oriFac - lowOri;
+
+  const rads: Record<number, number[]> = {};
+  for (const [idx] of weights) {
+    const r = meteos[idx].rads;
+    if (lowOri === 0) {
+      rads[idx] = range(METEO_HOURS).map(
+        (i) =>
+          r[0][i] * (1 - slopeWeight) + r[METEO_ORIS.length][i] * slopeWeight,
+      );
+      continue;
+    }
+    if (highOri === METEO_ORIS.length + 1) {
+      rads[idx] = range(METEO_HOURS).map(
+        (i) =>
+          r[METEO_ORIS.length - 1][i] * (1 - slopeWeight) +
+          r[METEO_ORIS.length * 2 - 1][i] * slopeWeight,
+      );
+      continue;
+    }
+
+    rads[idx] = [];
+
+    for (let i = 0; i < METEO_HOURS; ++i) {
+      const slope0 =
+        r[lowOri - 1][i] * (1 - oriWeight) + r[highOri - 1][i] * oriWeight;
+      const slope1 =
+        r[lowOri - 1 + METEO_ORIS.length][i] * (1 - oriWeight) +
+        r[highOri - 1 + METEO_ORIS.length][i] * oriWeight;
+      const slope = slope0 * (1 - slopeWeight) + slope1 * slopeWeight;
+      rads[idx].push(slope);
+    }
+  }
 
   return {
     temp: range(METEO_HOURS).map((i) =>
@@ -31,7 +76,7 @@ export function findMeteo(loc: [number, number]) {
       sum(weights.map(([idx, weight]) => weight * meteos[idx].app[i])),
     ),
     rad: range(METEO_HOURS).map((i) =>
-      sum(weights.map(([idx, weight]) => weight * meteos[idx].rad[i])),
+      sum(weights.map(([idx, weight]) => weight * rads[idx][i])),
     ),
   };
 }

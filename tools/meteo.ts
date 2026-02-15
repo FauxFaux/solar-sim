@@ -1,61 +1,74 @@
 import { writeFileSync } from 'node:fs';
-import {
-  chunks,
-  deltaEncode,
-  MCS_ZONE_CENTRES,
-} from '../src/system/mcs-meta.ts';
+import { deltaEncode, MCS_ZONE_CENTRES } from '../src/system/mcs-meta.ts';
 import { readFileSync } from 'fs';
 import { setTimeout } from 'node:timers/promises';
+import { METEO_ORIS, METEO_SLOPES } from '../src/world/meteo-meta.ts';
 
 const mode: 'pack' | 'download' = 'pack';
 
 async function pack() {
-  const files = MCS_ZONE_CENTRES.map(
-    (_, i) =>
-      (
-        JSON.parse(readFileSync(`meteo-raw/${i}.json`, 'utf-8')) as {
+  const dat: {
+    temp: number[];
+    app: number[];
+    rads: number[][];
+  }[] = [];
+
+  for (let zone = 0; zone < MCS_ZONE_CENTRES.length; ++zone) {
+    const docTemp = (
+      JSON.parse(readFileSync(`meteo-raw/${zone}.json`, 'utf-8')) as {
+        hourly: {
+          temperature_2m: number[];
+          // cloud_cover: number[];
+          // sunshine_duration: number[];
+          apparent_temperature: number[];
+          // direct_radiation: number[];
+          // diffuse_radiation: number[];
+        };
+      }
+    ).hourly;
+
+    const rads: number[][] = [];
+    for (const tilt of METEO_SLOPES) {
+      for (const azimuth of METEO_ORIS) {
+        const docGti = JSON.parse(
+          readFileSync(
+            `meteo-raw/gti-${zone}-${tilt}-${azimuth}.json`,
+            'utf-8',
+          ),
+        ) as {
           hourly: {
-            temperature_2m: number[];
-            // cloud_cover: number[];
-            // sunshine_duration: number[];
-            apparent_temperature: number[];
-            direct_radiation: number[];
-            diffuse_radiation: number[];
+            global_tilted_irradiance: number[];
           };
-        }
-      ).hourly,
-  );
+        };
+        rads.push(
+          deltaEncode(
+            docGti.hourly.global_tilted_irradiance.map((v) => Math.round(v)),
+          ),
+        );
+      }
+    }
 
-  const dat = files.map((file) => {
-    const {
-      temperature_2m,
-      apparent_temperature,
-      direct_radiation,
-      diffuse_radiation,
-    } = file;
-    const temp = temperature_2m.map((t) => Math.round(t));
-    const app = apparent_temperature.map((a, i) => Math.round(a - temp[i]));
-    const rad = direct_radiation.map((d, i) =>
-      Math.round(d + diffuse_radiation[i]),
-    );
-    return {
-      temp: deltaEncode(temp),
-      app: deltaEncode(app),
-      rad: deltaEncode(rad),
-    };
-  });
+    dat.push({
+      temp: deltaEncode(docTemp.temperature_2m.map((t) => Math.round(t))),
+      app: deltaEncode(
+        docTemp.apparent_temperature.map((a, i) =>
+          Math.round(a - docTemp.temperature_2m[i]),
+        ),
+      ),
+      rads,
+    });
+  }
 
-  const chunked = chunks(dat, 5);
-  for (let i = 0; i < chunked.length; i++) {
-    writeFileSync(`../src/assets/meteo-${i}.json`, JSON.stringify(chunked[i]));
+  for (let i = 0; i < dat.length; i++) {
+    writeFileSync(`../src/assets/meteo-${i}.json`, JSON.stringify(dat[i]));
   }
 
   return 0;
 }
 
 async function downloadRaw() {
-  for (const tilt of [30, 60]) {
-    for (const azimuth of [-135, -90, -45, 0, 45, 90, 135]) {
+  for (const tilt of METEO_SLOPES) {
+    for (const azimuth of METEO_ORIS) {
       for (let i = 0; i < MCS_ZONE_CENTRES.length; i++) {
         const [lat, lon] = MCS_ZONE_CENTRES[i];
         const url =
