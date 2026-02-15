@@ -113,7 +113,7 @@ function Zoomed({
   const shownDates = allDates.slice(Math.floor(ws), Math.ceil(we));
 
   return (
-    <svg width={w} height={h} style={{ 'user-select': 'none' }}>
+    <svg width={w} height={h + 400} style={{ 'user-select': 'none' }}>
       <g transform={`translate(${px},${pt})`}>
         {legendarySegmentLines(shownDates, tw, th)}
       </g>
@@ -126,7 +126,7 @@ function Zoomed({
         />
       </g>
 
-      <g transform={`translate(${px},${pt})`}>
+      <g transform={`translate(${px},${pt + th})`}>
         <polyline
           points={meteoAppPoints.join(' ')}
           fill={'#84cb'}
