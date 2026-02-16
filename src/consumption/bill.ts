@@ -1,7 +1,7 @@
 import { entriesOf, type Result } from '../ts.ts';
 import { Temporal } from 'temporal-polyfill';
 import * as Papa from 'papaparse';
-import { type LocalDate, parseDateHour } from '../granite/dates.ts';
+import { ld2pd, type LocalDate, parseDateHour } from '../granite/dates.ts';
 import { twoDp } from '../granite/numbers.ts';
 
 export type MaybeNumber = number | undefined | null;
@@ -78,13 +78,13 @@ export function parseBill(text: string): Result<ParsedBill> {
   return { success: true, value };
 }
 
-export function dateRange(
+export function pickDateRangeForBill(
   availableDates: LocalDate[],
   maxEntries: number,
 ): LocalDate[] {
   const sortedDates = availableDates.sort();
-  const startDate = Temporal.PlainDate.from(sortedDates[0]);
-  const endDate = Temporal.PlainDate.from(sortedDates[sortedDates.length - 1]);
+  const startDate = ld2pd(sortedDates[0]);
+  const endDate = ld2pd(sortedDates[sortedDates.length - 1]);
   const range: Temporal.PlainDate[] = [];
   let currentDate = startDate;
   while (currentDate.dayOfWeek !== 1) {

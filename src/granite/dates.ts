@@ -47,13 +47,27 @@ export function parseDateHour(str: string): [LocalDate, number] | undefined {
 
 export function allDatesInYear(year: number) {
   let currentDate = Temporal.PlainDate.from({ year, month: 1, day: 1 });
-  const ret = [];
-
   const days = currentDate.daysInYear;
+  return makeDateRange(currentDate, days);
+}
 
+export function makeDateRange(
+  start: Temporal.PlainDate,
+  days: number,
+): Temporal.PlainDate[] {
+  let currentDate = start;
+  const ret: Temporal.PlainDate[] = [];
   for (let i = 0; i < days; i++) {
     ret.push(currentDate);
     currentDate = currentDate.add({ days: 1 });
   }
   return ret;
+}
+
+export function pd2ld(pd: Temporal.PlainDate): LocalDate {
+  return pd.toString() as LocalDate;
+}
+
+export function ld2pd(ld: LocalDate): Temporal.PlainDate {
+  return Temporal.PlainDate.from(ld);
 }

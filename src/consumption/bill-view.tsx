@@ -1,8 +1,12 @@
 import { Temporal } from 'temporal-polyfill';
 import { keysOf } from '../ts.ts';
-import { dateRange, isSetAndFinite, type ParsedBill } from './bill.ts';
+import {
+  pickDateRangeForBill,
+  isSetAndFinite,
+  type ParsedBill,
+} from './bill.ts';
 import { useState } from 'preact/hooks';
-import { DAY_NAMES, type LocalDate } from '../granite/dates.ts';
+import { DAY_NAMES, ld2pd, type LocalDate } from '../granite/dates.ts';
 import { range } from '../granite/numbers.ts';
 
 export function BillView({
@@ -21,7 +25,7 @@ export function BillView({
 
   const [picked, setPicked] = useState(false);
 
-  const allDates = dateRange(keysOf(bill), rowsToShow * daysPerRow);
+  const allDates = pickDateRangeForBill(keysOf(bill), rowsToShow * daysPerRow);
 
   const peak = Math.max(
     ...allDates
@@ -64,7 +68,7 @@ export function BillView({
               }}
             >
               <title>
-                {date} ({DAY_NAMES[Temporal.PlainDate.from(date).dayOfWeek - 1]}
+                {date} ({DAY_NAMES[ld2pd(date).dayOfWeek - 1]}
                 ):{' '}
                 {data?.every((v) => isSetAndFinite(v))
                   ? data.reduce((a, b) => a + b, 0).toFixed(2)

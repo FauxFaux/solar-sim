@@ -20,12 +20,17 @@ import { DayView } from './day-view.tsx';
 import { Hint } from '../hint.tsx';
 import exampleBill from './example-bill.json';
 import type { ComponentChildren } from 'preact';
-import { Temporal } from 'temporal-polyfill';
-import type { LocalDate } from '../granite/dates.ts';
+import {
+  ld2pd,
+  type LocalDate,
+  makeDateRange,
+  pd2ld,
+} from '../granite/dates.ts';
 import { range } from '../granite/numbers.ts';
 import { TransContext } from '../trans.ts';
+import { deltaEncode } from '../system/mcs-meta.ts';
 
-export function BillAnalysis({ uss: _ }: { uss: State<UrlState> }) {
+export function BillAnalysis({ uss: [, setUs] }: { uss: State<UrlState> }) {
   const [file, setFile] = useState<File | undefined>(undefined);
   const [_ts, setTs] = useContext(TransContext);
 
@@ -35,7 +40,7 @@ export function BillAnalysis({ uss: _ }: { uss: State<UrlState> }) {
     setCursorReal(date);
     setTs((ts) => ({
       ...ts,
-      billPointy: [Temporal.PlainDate.from(date), NaN],
+      billPointy: [ld2pd(date), NaN],
     }));
   };
   const [parsed, setParsed] = useState<Result<ParsedBill>>(
@@ -52,7 +57,13 @@ export function BillAnalysis({ uss: _ }: { uss: State<UrlState> }) {
 
   useEffect(() => {
     if (!parsed?.success) return;
-    setCursor(keysOf(parsed.value).sort()[0]);
+    const bill = parsed.value;
+    setCursor(keysOf(bill).sort()[0]);
+    const goodWeek = findGoodWeek(bill)[0];
+    setUs((us) => ({
+      ...us,
+      bwd: deltaEncode(goodWeek.flat().map((v) => Math.round(v * 100))),
+    }));
   }, [parsed]);
 
   const stats = countStats(parsed?.success ? parsed.value : {});
@@ -258,4 +269,15 @@ function countStats(bill: ParsedBill) {
   );
 
   return { peak, baseline, byWindow };
+}
+
+function findGoodWeek(bill: ParsedBill) {
+  return keysOf(bill)
+    .map((d) => ld2pd(d))
+    .filter((d) => d.dayOfWeek === 1)
+    .map((d) =>
+      makeDateRange(d, 7)
+        .map((day) => bill[pd2ld(day)])
+        .filter((days) => days && days.every((v) => isSetAndFinite(v))),
+    );
 }
