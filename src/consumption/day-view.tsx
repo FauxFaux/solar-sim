@@ -2,7 +2,7 @@ import { isSetAndFinite, type MaybeNumber } from './bill.ts';
 import type { Stats } from './bill-analysis.tsx';
 import { useContext } from 'preact/hooks';
 import { range } from '../granite/numbers.ts';
-import { TransContext } from '../trans.ts';
+import { TransContext } from '../trans-context.ts';
 
 export function DayView({ day, stats }: { day: MaybeNumber[]; stats: Stats }) {
   const [, setTs] = useContext(TransContext);

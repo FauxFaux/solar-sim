@@ -12,6 +12,7 @@
     "build": "vite build"
   },
   "dependencies": {
+    "ensure-error": "^5",
     "fflate": "^0.8",
     "papaparse": "^5",
     "preact": "^10",

@@ -1,33 +1,14 @@
-import {
-  deltaDecode,
-  interpLoc,
-  MCS_ZONE_CENTRES,
-} from '../system/mcs-meta.ts';
+import { interpLoc } from '../system/mcs-meta.ts';
 import { range, sum } from '../granite/numbers.ts';
 import { METEO_HOURS, METEO_ORIS } from './meteo-meta.ts';
-
-const meteos = (
-  await Promise.all(
-    range(MCS_ZONE_CENTRES.length).map(
-      (zone) => import(`../assets/meteo-${zone}.json`),
-    ),
-  )
-)
-  .map((v) => v.default as { temp: number[]; app: number[]; rads: number[][] })
-  .map(({ temp, app, rads }) => {
-    const detemp = deltaDecode(temp);
-    return {
-      temp: detemp,
-      app: deltaDecode(app).map((a, i) => a + detemp[i]),
-      rads: rads.map((rad) => deltaDecode(rad)),
-    };
-  });
+import type { Meteo } from '../meteo-provider.ts';
 
 export function findMeteo(
+  meteos: Meteo[],
   loc: [number, number],
   [slope, ori]: [number, number],
 ) {
-  const weights = interpLoc(loc);
+  const weights = meteos.length > 1 ? interpLoc(loc) : [[0, 1]];
 
   const slopeWeight = slope / 90;
 

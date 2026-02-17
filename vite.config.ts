@@ -7,7 +7,10 @@ import preload from 'vite-plugin-preload';
 export default defineConfig({
   plugins: [
     preact(),
-    preload(),
+    preload({
+      shouldPreload: ({ fileName: f }) =>
+        !f.startsWith('assets/meteo-') || f.startsWith('assets/meteo-6-'),
+    }),
     analyzer({ enabled: process.env.ANALYZE === 'true' }),
   ],
 });

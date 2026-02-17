@@ -3,17 +3,14 @@ import type { State } from './ts.ts';
 import { HomeUsage } from './usage';
 import { SystemDesign } from './system';
 import { ConsumptionDesign } from './consumption';
-import { useState } from 'preact/hooks';
 import { WorldDisplay } from './world';
 import { FaCreativeCommons, FaCreativeCommonsBy } from 'react-icons/fa6';
 import { IconContext } from 'react-icons';
-import { TransContext as TransContext1, type TransState } from './trans.ts';
+import { MagicalStates } from './magical-states.tsx';
 
 export function App({ uss }: { uss: State<UrlState> }) {
-  const tss: State<TransState> = useState({});
-
   return (
-    <TransContext1 value={tss}>
+    <MagicalStates>
       <div id={'tiles'}>
         <HomeUsage uss={uss} />
         <SystemDesign uss={uss} />
@@ -21,7 +18,7 @@ export function App({ uss }: { uss: State<UrlState> }) {
         <WorldDisplay uss={uss} />
       </div>
       <Footer />
-    </TransContext1>
+    </MagicalStates>
   );
 }
 

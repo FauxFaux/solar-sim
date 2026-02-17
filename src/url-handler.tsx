@@ -102,7 +102,6 @@ const urlDictionary = strToU8(
 
 function packUs(us: UrlState) {
   const json = JSON.stringify(shallowSortKeys(us));
-  console.log(json);
   const data = deflateSync(strToU8(json), {
     level: 9,
     dictionary: urlDictionary,

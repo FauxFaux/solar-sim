@@ -27,7 +27,7 @@ import {
   pd2ld,
 } from '../granite/dates.ts';
 import { range } from '../granite/numbers.ts';
-import { TransContext } from '../trans.ts';
+import { TransContext } from '../trans-context.ts';
 import { deltaEncode } from '../system/mcs-meta.ts';
 
 export function BillAnalysis({ uss: [, setUs] }: { uss: State<UrlState> }) {

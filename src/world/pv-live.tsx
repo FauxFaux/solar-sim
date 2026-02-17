@@ -1,6 +1,12 @@
 import pvLive from '../assets/pv-live.json';
 import { type State } from '../ts.ts';
-import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
+import {
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'preact/hooks';
 import { findMeteo } from './meteo.ts';
 import type { UrlState } from '../url-handler.tsx';
 import { Scrub } from './scrub.tsx';
@@ -8,6 +14,7 @@ import { allDatesInYear, DAY_NAMES, MONTH_NAMES } from '../granite/dates.ts';
 import { ordinal, sum } from '../granite/numbers.ts';
 import { Temporal } from 'temporal-polyfill';
 import { chunks } from '../system/mcs-meta.ts';
+import { MeteoContext } from '../meteo-provider.ts';
 
 // data file has 16 hours of data, from 06:00 to 21:59.999; 0: 06:00, 1: 07:00, ..., 6: 12:00, ..., 15: 21:00
 
@@ -74,6 +81,8 @@ function Zoomed({
   window: [number, number];
   w: number;
 }) {
+  const [meteoData] = useContext(MeteoContext);
+
   const h = 200;
   const pt = 10;
   const pb = 30;
@@ -83,7 +92,10 @@ function Zoomed({
   // positive
   const thp = 0.8 * th;
 
-  const meteo = useMemo(() => findMeteo(us.loc, us.ori), [us.loc, us.ori]);
+  const meteo = useMemo(
+    () => findMeteo(meteoData, us.loc, us.ori),
+    [meteoData, us.loc, us.ori],
+  );
 
   const allDates = allDatesInYear(2025);
 

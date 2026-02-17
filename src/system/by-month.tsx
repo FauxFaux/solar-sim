@@ -3,7 +3,7 @@ import { findZone } from './mcs.ts';
 import { heatCalculation } from '../usage/heating.tsx';
 import { useContext } from 'preact/hooks';
 import { CAL } from '../granite/dates.ts';
-import { TransContext } from '../trans.ts';
+import { TransContext } from '../trans-context.ts';
 
 export function ByMonth({ us }: { us: UrlState }) {
   const [ts] = useContext(TransContext);

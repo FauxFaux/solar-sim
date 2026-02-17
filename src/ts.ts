@@ -1,4 +1,5 @@
 import type { Dispatch, StateUpdater } from 'preact/hooks';
+import ensureError from 'ensure-error';
 
 export const debounce = <F extends (...args: Parameters<F>) => ReturnType<F>>(
   func: F,
@@ -31,13 +32,24 @@ export const fromEntries = Object.fromEntries as <T extends object>(
   entries: Array<[keyof T, T[keyof T]]>,
 ) => T;
 
+export const sleep = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
 export type Result<T> =
   | { success: true; value: T }
   | { success: false; error: Error };
 
+export async function tryTo<T>(fn: () => Promise<T>): Promise<Result<T>> {
+  try {
+    const value = await fn();
+    return { success: true, value };
+  } catch (error) {
+    return { success: false, error: ensureError(error) };
+  }
+}
+
 export function andThen<T>(
   fn: () => Promise<Result<T>>,
-  // do I understand why this union is here?
   set: (v: Result<T>) => void,
 ) {
   fn()
