@@ -3,6 +3,7 @@ import { OrientationInfo } from './orientation-info.tsx';
 import type { UrlState } from '../url-handler.tsx';
 import type { State } from '../ts.ts';
 import { useMemo } from 'preact/hooks';
+import { compassName } from '../granite/directions.ts';
 
 export function OrientationPicker({ uss }: { uss: State<UrlState> }) {
   const [us, setUs] = uss;
@@ -32,27 +33,4 @@ export function OrientationPicker({ uss }: { uss: State<UrlState> }) {
       <div>MCS zone: {zone.name}</div>
     </div>
   );
-}
-
-export function compassName(ori: number) {
-  const dirs = [
-    'N',
-    'NNE',
-    'NE',
-    'ENE',
-    'E',
-    'ESE',
-    'SE',
-    'SSE',
-    'S',
-    'SSW',
-    'SW',
-    'WSW',
-    'W',
-    'WNW',
-    'NW',
-    'NNW',
-  ];
-  const idx = Math.round(((ori + 180) % 360) / 22.5) % 16;
-  return dirs[idx];
 }

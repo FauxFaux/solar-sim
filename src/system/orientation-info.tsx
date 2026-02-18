@@ -2,7 +2,8 @@ import { type State } from '../ts.ts';
 import type { UrlState } from '../url-handler.tsx';
 import { oris, slopes } from './mcs.ts';
 import { range } from '../granite/numbers.ts';
-import { compassName } from './orientation-picker.tsx';
+
+import { compassName } from '../granite/directions.ts';
 
 export function OrientationInfo({
   mcs,
