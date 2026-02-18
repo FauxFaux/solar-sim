@@ -199,3 +199,12 @@ form.heating-usage > label {
 .load-profile-table tr.selected {
   background: #3434a4;
 }
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

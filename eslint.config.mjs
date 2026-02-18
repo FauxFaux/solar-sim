@@ -23,6 +23,7 @@ export default defineConfig(
           varsIgnorePattern: '^_',
         },
       ],
+      '@typescript-eslint/consistent-type-imports': 'error',
     },
   },
 );

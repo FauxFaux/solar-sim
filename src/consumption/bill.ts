@@ -1,5 +1,5 @@
 import { entriesOf, type Result } from '../ts.ts';
-import { Temporal } from 'temporal-polyfill';
+import type { Temporal } from 'temporal-polyfill';
 import * as Papa from 'papaparse';
 import { ld2pd, type LocalDate, parseDateHour } from '../granite/dates.ts';
 import { twoDp } from '../granite/numbers.ts';

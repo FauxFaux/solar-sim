@@ -11,7 +11,7 @@ import {
 
 export function MagicalStates({ children }: { children: ComponentChildren }) {
   const tss: State<TransState> = useState({});
-  const meteos: State<Meteo[]> = useState([defaultMeteo]);
+  const meteos: State<Meteo[]> = useState(defaultMeteo);
 
   onceMeteosLoaded(meteos[1]);
 

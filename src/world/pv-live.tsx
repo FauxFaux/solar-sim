@@ -12,9 +12,10 @@ import type { UrlState } from '../url-handler.tsx';
 import { Scrub } from './scrub.tsx';
 import { allDatesInYear, DAY_NAMES, MONTH_NAMES } from '../granite/dates.ts';
 import { ordinal, sum } from '../granite/numbers.ts';
-import { Temporal } from 'temporal-polyfill';
+import type { Temporal } from 'temporal-polyfill';
 import { chunks } from '../system/mcs-meta.ts';
-import { MeteoContext } from '../meteo-provider.ts';
+import { defaultMeteo, MeteoContext } from '../meteo-provider.ts';
+import { FaSpinner } from 'react-icons/fa6';
 
 // data file has 16 hours of data, from 06:00 to 21:59.999; 0: 06:00, 1: 07:00, ..., 6: 12:00, ..., 15: 21:00
 
@@ -24,6 +25,7 @@ export function PvLive({ uss: [us] }: { uss: State<UrlState> }) {
   const [w, setW] = useState(350);
   const frameRef = useRef<HTMLDivElement>(null);
   const windows = useState([278, 285] as [number, number]);
+  const [meteos] = useContext(MeteoContext);
   const [window] = windows;
 
   useLayoutEffect(() => {
@@ -37,7 +39,12 @@ export function PvLive({ uss: [us] }: { uss: State<UrlState> }) {
 
   return (
     <div style={'max-width: 780px'} ref={frameRef}>
-      <h3>PV Live: {w}</h3>
+      <h3>
+        PV Live:{' '}
+        {meteos.length === defaultMeteo.length ? (
+          <FaSpinner style={{ animation: 'rotation 1s linear infinite' }} />
+        ) : null}
+      </h3>
       <Scrub windows={windows} w={w} />
       <Zoomed us={us} window={window} w={w} />
     </div>

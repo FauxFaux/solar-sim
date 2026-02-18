@@ -1,6 +1,6 @@
 import { createContext } from 'preact';
 import type { State } from './ts.ts';
-import { Temporal } from 'temporal-polyfill';
+import type { Temporal } from 'temporal-polyfill';
 
 export interface TransState {
   billPointy?: [Temporal.PlainDate, number];

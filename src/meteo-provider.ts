@@ -24,7 +24,7 @@ export function onceMeteosLoaded(set: (meteos: Meteo[]) => void) {
   loadingMeteos.then((v) => v.success && set(v.value));
 }
 
-export const defaultMeteo: Meteo = decodeMeteo(meteo6);
+export const defaultMeteo = [decodeMeteo(meteo6)];
 
 const loadingMeteos = tryTo(loadMeteosRaw);
 
