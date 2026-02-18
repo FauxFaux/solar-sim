@@ -9,6 +9,7 @@
     "test": "vitest",
     "circular": "madge --circular --extensions ts,tsx src",
     "analyze": "ANALYZE=true vite build",
+    "lint": "eslint .",
     "build": "vite build"
   },
   "dependencies": {
@@ -21,12 +22,15 @@
     "temporal-polyfill": "^0.3"
   },
   "devDependencies": {
+    "@eslint/js": "^10",
     "@preact/preset-vite": "^2",
     "@types/node": "^24",
     "@types/papaparse": "^5",
+    "eslint": "^10",
     "madge": "^8",
     "prettier": "~3.8",
     "typescript": "~5.9",
+    "typescript-eslint": "^8",
     "vite": "^7",
     "vite-bundle-analyzer": "^1",
     "vite-plugin-preload": "^0.4",

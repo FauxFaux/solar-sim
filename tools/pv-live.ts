@@ -9,7 +9,7 @@ async function main() {
       const [_id, date, gen] = line.split(',');
       return [date, parseFloat(gen)] as const;
     })
-    .filter(([_, gen]) => isFinite(gen));
+    .filter(([, gen]) => isFinite(gen));
   const doc = [];
   const row = [];
   let nought = 0;

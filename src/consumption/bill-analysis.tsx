@@ -32,7 +32,7 @@ import { deltaEncode } from '../system/mcs-meta.ts';
 
 export function BillAnalysis({ uss: [, setUs] }: { uss: State<UrlState> }) {
   const [file, setFile] = useState<File | undefined>(undefined);
-  const [_ts, setTs] = useContext(TransContext);
+  const [, setTs] = useContext(TransContext);
 
   // (real default set as an effect; typing hack)
   const [cursor, setCursorReal] = useState('1980-01-01' as LocalDate);

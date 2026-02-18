@@ -215,7 +215,11 @@ function legendaryDates(shownDates: Temporal.PlainDate[], tw: number) {
   return shownDates.map((d, i) => (show(d) ? withDay(d, i) : null));
 }
 
-function legendarySegmentLines(shownDates: any[], tw: number, th: number) {
+function legendarySegmentLines(
+  shownDates: Temporal.PlainDate[],
+  tw: number,
+  th: number,
+) {
   const dw = tw / shownDates.length;
   if (dw < 30) return [];
   return shownDates.map((_, i) => {

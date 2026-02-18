@@ -1,4 +1,3 @@
-import { Temporal } from 'temporal-polyfill';
 import { keysOf } from '../ts.ts';
 import {
   pickDateRangeForBill,
