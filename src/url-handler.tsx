@@ -118,7 +118,8 @@ function unpackUs(hash: string): UrlState {
   return JSON.parse(str);
 }
 
-function shallowSortKeys<T extends Record<string, unknown>>(obj: T): T {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any apparently I don't understand these typings
+function shallowSortKeys<T extends Record<string, any>>(obj: T): T {
   return Object.fromEntries(
     Object.entries(obj).sort(([ka], [kb]) => ka.localeCompare(kb)),
   ) as T;
