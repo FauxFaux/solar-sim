@@ -83,21 +83,22 @@ export function UrlHandler() {
 
 // duplicated for stability reasons
 const urlDictionary = strToU8(
-  JSON.stringify(
-    shallowSortKeys({
-      v: 1,
-      huc: '2',
-      hub: 2700,
-      hht: 'p',
-      heg: null,
-      hee: 68,
-      hef: null,
-      loc: [52.3, -1.4],
-      ori: [40, 25],
-      kwp: 4.4,
-      bwd: defaultBwd,
-    }),
-  ),
+  JSON.stringify(defaultBwd) +
+    JSON.stringify(
+      shallowSortKeys({
+        v: 1,
+        huc: '2',
+        hub: 2700,
+        hht: 'p',
+        heg: null,
+        hee: 68,
+        hef: null,
+        loc: [52.3, -1.4],
+        ori: [40, 25],
+        kwp: 4.4,
+        bwd: [],
+      }),
+    ),
 );
 
 function packUs(us: UrlState) {
