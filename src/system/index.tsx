@@ -9,7 +9,7 @@ export function SystemDesign({ uss }: { uss: State<UrlState> }) {
     <>
       <LocationPicker uss={uss} />
       <OrientationPicker uss={uss} />
-      <SysStats uss={uss} />
+      {/*<SysStats uss={uss} />*/}
     </>
   );
 }

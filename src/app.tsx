@@ -14,7 +14,7 @@ export function App({ uss }: { uss: State<UrlState> }) {
       <div id={'tiles'}>
         <HomeUsage uss={uss} />
         <SystemDesign uss={uss} />
-        <ConsumptionDesign uss={uss} />
+        {/*<ConsumptionDesign uss={uss} />*/}
         <WorldDisplay uss={uss} />
       </div>
       <Footer />

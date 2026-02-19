@@ -29,7 +29,7 @@ export function LocationPicker({ uss: [us, setUs] }: { uss: State<UrlState> }) {
 
   return (
     <div>
-      <h3>Location</h3>
+      <h3 style={{ 'margin-bottom': 0 }}>Location</h3>
       <svg
         width={350}
         height={424}

@@ -115,7 +115,7 @@ function Summary({ sim, us }: { sim: SimHour[][]; us: UrlState }) {
   return (
     <div class={'summary'}>
       <p>
-        Annual import: {totalImport.toFixed()} kWh, an{' '}
+        Annual import: {totalImport.toFixed()} kWh, a{' '}
         {(100 * (1 - totalImport / us.hub)).toFixed()}% reduction, costs £
         {remainingImportCost.toFixed()}.
       </p>
