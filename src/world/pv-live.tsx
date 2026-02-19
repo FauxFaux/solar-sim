@@ -100,7 +100,7 @@ function Summary({ sim, us }: { sim: SimHour[][]; us: UrlState }) {
   const batteryFillDays = sim.filter((day) =>
     day.some((hour) => hour[0] > us.bat * 0.99),
   ).length;
-  const totalImport = sum(simf.map((v) => v[1]));
+  const totalImport = sum(simf.map((v) => v[1])) / 0.99;
   const totalExported = sum(simf.map((v) => v[2]));
   const batteryCost = (us.bat / 0.9) * 220;
   const panelCost = us.kwp * 700;
@@ -112,30 +112,27 @@ function Summary({ sim, us }: { sim: SimHour[][]; us: UrlState }) {
   const originalCost = us.hub * unitCost;
   const remainingImportCost = totalImport * unitCost;
   const exportProfit = totalExported * unitValue;
+  const importSavings = originalCost - remainingImportCost;
+  const kay = (n: number) => `£${(n / 1000).toFixed(1)}k`;
+
   return (
     <div class={'summary'}>
       <p>
         Annual import: {totalImport.toFixed()} kWh, a{' '}
-        {(100 * (1 - totalImport / us.hub)).toFixed()}% reduction, costs £
-        {remainingImportCost.toFixed()}.
+        {(100 * (1 - totalImport / us.hub)).toFixed()}% reduction, saving £
+        {importSavings.toFixed()}, costs £{remainingImportCost.toFixed()}.
       </p>
       <p>
         Annual export: {totalExported.toFixed()} kWh, £
         {(totalExported * unitValue).toFixed()} return.
       </p>
       <p>
-        Estimated install cost: £{(flatCost / 1000).toFixed(1)}k + £
-        {(panelCost / 1000).toFixed(1)}k panels + £
-        {(batteryCost / 1000).toFixed(1)}k batteries = £
-        {(systemCost / 1000).toFixed(1)}k.
+        Estimated install cost: {kay(flatCost)} + {kay(panelCost)} panels +{' '}
+        {kay(batteryCost)} batteries = {kay(systemCost)}.
       </p>
       <p>
-        Payback on today's fixed tariffs:{' '}
-        {(
-          systemCost /
-          (originalCost - remainingImportCost + exportProfit)
-        ).toFixed(1)}{' '}
-        years
+        Payback = install / (import savings + export profit) ={' '}
+        {(systemCost / (importSavings + exportProfit)).toFixed(1)} years
       </p>
       <p>
         Battery fills {batteryFillDays} days/year, battery empties{' '}
