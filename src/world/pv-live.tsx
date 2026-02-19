@@ -43,7 +43,7 @@ export function PvLive({ uss: [us] }: { uss: State<UrlState> }) {
   return (
     <div style={'max-width: 780px'} ref={frameRef}>
       <h3>
-        PV Live:{' '}
+        PV Live{' '}
         {meteos.length === defaultMeteo.length ? (
           <FaSpinner style={{ animation: 'rotation 1s linear infinite' }} />
         ) : null}

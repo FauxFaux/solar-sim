@@ -11,32 +11,40 @@ export function OrientationPicker({ uss }: { uss: State<UrlState> }) {
   const zone = useMemo(() => findZone(us.loc), [us.loc]);
   const [slope, ori] = us.ori;
   const gen = zone.data[slope][Math.round(Math.abs(ori) / 5)];
+  const aboutPanels = Math.ceil(us.kwp / 0.43);
+  const aboutBatteries = Math.ceil(us.bat / (2.56 * 0.9));
   return (
     <div>
       <h3>Solar system</h3>
       <NumberInput
         values={[us.kwp, (kwp: number) => setUs((us) => ({ ...us, kwp }))]}
         unit={'kWp'}
+        scrollMax={21.6}
+        step={0.1}
       >
         <abbr
           title={
             'assuming 430W panels, typical for a 2025, 1.8mx1.1m domestic panel'
           }
         >
-          about {(us.kwp / 0.43).toFixed()} panels
+          {aboutPanels ? 'about' : ''} {aboutPanels} panel
+          {aboutPanels === 1 ? '' : 's'}
         </abbr>
       </NumberInput>
       <NumberInput
         values={[us.bat, (bat: number) => setUs((us) => ({ ...us, bat }))]}
+        scrollMax={25.6 * 0.9}
+        step={0.1}
         unit={'kWh'}
       >
         <abbr
           title={
-            'assuming 2.56kWh Growatt ARK LV batteries at 90% usable, (65cm x 25cm x 17cm W/D/H each);' +
+            'assuming 2.56kWh Growatt ARK LV batteries at 90% usable ("DoD"), (65cm x 25cm x 17cm W/D/H each);' +
             ' a stack of four being about the size of a car tyre'
           }
         >
-          about {Math.ceil(us.bat / (2.56 * 0.9)).toFixed()} batteries
+          {aboutBatteries ? 'about' : ''} {aboutBatteries} batter
+          {aboutBatteries === 1 ? 'y' : 'ies'}
         </abbr>
       </NumberInput>
       <OrientationInfo mcs={zone.data} uss={uss} />

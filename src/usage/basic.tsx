@@ -1,40 +1,16 @@
 import type { UrlState } from '../url-handler.tsx';
-import { entriesOf, type State } from '../ts.ts';
+import type { State } from '../ts.ts';
 import { FaBuilding, FaHotTubPerson, FaHouseChimney } from 'react-icons/fa6';
-import { FaCog } from 'react-icons/fa';
 import type { ComponentChildren } from 'preact';
 import { Hint } from '../hint.tsx';
+import { NumberInput } from '../widgets/number-input.tsx';
 
 export function BasicUsage({ uss: [us, setUs] }: { uss: State<UrlState> }) {
-  const form: Record<
-    UrlState['huc'],
-    [ComponentChildren, ComponentChildren, number?]
-  > = {
-    '1': ['1 bedroom, 1-2 people', <FaBuilding />, 1800],
-    '2': ['2-3 bedrooms, 2-3 people', <FaHouseChimney />, 2700],
-    '4': ['4+ bedrooms, 4-5 people', <FaHotTubPerson />, 4100],
-    c: [
-      <>
-        I know:{' '}
-        <input
-          type={'number'}
-          min={0}
-          step={50}
-          style={'width: 8ch'}
-          value={us.hub}
-          onChange={(e) =>
-            setUs((us) => ({
-              ...us,
-              huc: 'c',
-              hub: e.currentTarget.valueAsNumber,
-            }))
-          }
-        />{' '}
-        <abbr title={'kilo-watt hours per year'}>kWh/yr</abbr>
-      </>,
-      <FaCog />,
-    ],
-  };
+  const form: [ComponentChildren, ComponentChildren, number][] = [
+    ['1 bedroom, 1-2 people', <FaBuilding />, 1800],
+    ['2-3 bedrooms, 2-3 people', <FaHouseChimney />, 2700],
+    ['4+ bedrooms, 4-5 people', <FaHotTubPerson />, 4100],
+  ];
 
   const ofcomTableHint = (
     <Hint>
@@ -58,17 +34,15 @@ export function BasicUsage({ uss: [us, setUs] }: { uss: State<UrlState> }) {
         {ofcomTableHint}
       </h3>
       <form class={'home-usage'}>
-        {entriesOf(form).map(([k, [label, icon, setTo]]) => (
-          <label key={k} class={us.huc === k ? 'selected' : ''}>
+        {form.map(([label, icon, setTo]) => (
+          <label>
             <input
               type={'radio'}
               name={'home-usage'}
-              value={k}
-              checked={us.huc === k}
+              checked={Math.abs(us.hub - setTo) < 400}
               onChange={() =>
                 setUs((us) => ({
                   ...us,
-                  huc: k,
                   ...(setTo ? { hub: setTo } : {}),
                 }))
               }
@@ -77,6 +51,14 @@ export function BasicUsage({ uss: [us, setUs] }: { uss: State<UrlState> }) {
           </label>
         ))}
       </form>
+      <NumberInput
+        values={[us.hub, (hub: number) => setUs((us) => ({ ...us, hub }))]}
+        unit={'kWh/year'}
+        scrollMax={10000}
+        step={50}
+      >
+        {(us.hub / 365).toFixed(1)} kWh/day
+      </NumberInput>
     </div>
   );
 }
