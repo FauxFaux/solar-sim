@@ -145,17 +145,18 @@ function Zoomed({
   const bwdScale = us.hub / (sum(bwd.flat()) * (365 / 7));
 
   const simulationResult = simulateYear(
-    // TODO: scaling factor
+    // TODO: DST?
     chunks(
       meteo.rad.map((x) => x * radScale),
       24,
     ),
+    // TODO: DST?
     range(54)
       .map(() => bwd.map((v) => v.map((v) => v * bwdScale)))
       .flat()
       // 1st jan: wednesday
       .slice(3),
-    5,
+    us.bat,
   );
 
   const solarPoints = pointsFor(

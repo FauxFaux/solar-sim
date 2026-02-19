@@ -208,3 +208,9 @@ form.heating-usage > label {
     transform: rotate(360deg);
   }
 }
+
+.miniflex {
+  display: flex;
+  width: 100%;
+  justify-content: space-evenly;
+}

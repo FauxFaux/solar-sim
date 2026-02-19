@@ -28,6 +28,7 @@ export interface UrlState {
   // installation details
   ori: [slope: number, ori: number];
   kwp: number;
+  bat: number;
 
   // extracted data from bills, whole week(s?), packed
   bwd?: number[];
@@ -65,6 +66,7 @@ export function UrlHandler() {
           loc: [52.3, -1.4],
           ori: [40, 25],
           kwp: 4.4,
+          bat: 2.3,
           bwd: defaultBwd,
         },
   );
@@ -97,6 +99,7 @@ const urlDictionary = strToU8(
         loc: [52.3, -1.4],
         ori: [40, 25],
         kwp: 4.4,
+        bat: 2.3,
         bwd: [],
       }),
     ),
