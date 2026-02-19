@@ -1,13 +1,13 @@
 import { interpLoc } from '../system/mcs-meta.ts';
 import { range, sum } from '../granite/numbers.ts';
 import { METEO_HOURS, METEO_ORIS } from './meteo-meta.ts';
-import type { Meteo } from '../meteo-provider.ts';
+import type { DecodedMeteo, Meteo } from '../meteo-provider.ts';
 
 export function findMeteo(
-  meteos: Meteo[],
+  meteos: DecodedMeteo[],
   loc: [number, number],
   [slope, ori]: [number, number],
-) {
+): Meteo {
   const weights = meteos.length > 1 ? interpLoc(loc) : [[0, 1]];
 
   const slopeWeight = slope / 90;

@@ -16,7 +16,7 @@ import type { Temporal } from 'temporal-polyfill';
 import { chunks } from '../system/mcs-meta.ts';
 import { defaultMeteo, MeteoContext } from '../meteo-provider.ts';
 import { FaSpinner } from 'react-icons/fa6';
-import { simulateYear } from '../granite/simulate.ts';
+import { type SimHour, simulateYear } from '../granite/simulate.ts';
 import { unpackBwd } from '../consumption/bill.ts';
 import { findZone } from '../system/mcs.ts';
 
@@ -29,7 +29,15 @@ export function PvLive({ uss: [us] }: { uss: State<UrlState> }) {
   const frameRef = useRef<HTMLDivElement>(null);
   const windows = useState([278, 285] as [number, number]);
   const [meteos] = useContext(MeteoContext);
+  const zone = useMemo(() => findZone(us.loc), [us.loc]);
+  const [meteoData] = useContext(MeteoContext);
+  const meteo = useMemo(
+    () => findMeteo(meteoData, us.loc, us.ori),
+    [meteoData, us.loc, us.ori],
+  );
+
   const [window] = windows;
+  const [slope, ori] = us.ori;
 
   useLayoutEffect(() => {
     const measure = () => {
@@ -40,16 +48,99 @@ export function PvLive({ uss: [us] }: { uss: State<UrlState> }) {
     return () => globalWindow.removeEventListener('resize', measure);
   }, []);
 
+  const mcsGen = zone.data[slope]?.[Math.round(Math.abs(ori) / 5)];
+
+  const radScale = (mcsGen / sum(meteo.rad)) * us.kwp;
+
+  const bwd = unpackBwd(us.bwd!);
+
+  const bwdScale = us.hub / (sum(bwd.flat()) * (365 / 7));
+
+  const simulationResult = simulateYear(
+    // TODO: DST?
+    chunks(
+      meteo.rad.map((x) => x * radScale),
+      24,
+    ),
+    // TODO: DST?
+    range(54)
+      .map(() => bwd.map((v) => v.map((v) => v * bwdScale)))
+      .flat()
+      // 1st jan: wednesday
+      .slice(3),
+    us.bat,
+  );
+
   return (
     <div style={'max-width: 780px'} ref={frameRef}>
       <h3>
-        PV Live{' '}
+        Simulation{' '}
         {meteos.length === defaultMeteo.length ? (
           <FaSpinner style={{ animation: 'rotation 1s linear infinite' }} />
         ) : null}
       </h3>
       <Scrub windows={windows} w={w} />
-      <Zoomed us={us} window={window} w={w} />
+      <Zoomed
+        us={us}
+        window={window}
+        w={w}
+        sim={simulationResult}
+        meteo={meteo}
+      />
+      <Summary sim={simulationResult} us={us} />
+    </div>
+  );
+}
+
+function Summary({ sim, us }: { sim: SimHour[][]; us: UrlState }) {
+  const simf = sim.flat();
+  const batteryEmptyDays = sim.filter((day) =>
+    day.some((hour) => hour[0] < 0.05),
+  ).length;
+  const batteryFillDays = sim.filter((day) =>
+    day.some((hour) => hour[0] > us.bat * 0.99),
+  ).length;
+  const totalImport = sum(simf.map((v) => v[1]));
+  const totalExported = sum(simf.map((v) => v[2]));
+  const batteryCost = (us.bat / 0.9) * 220;
+  const panelCost = us.kwp * 700;
+  const flatCost = 3000;
+  const systemCost = flatCost + batteryCost + panelCost;
+  const unitCost = 0.2735;
+  const unitValue = 0.12;
+
+  const originalCost = us.hub * unitCost;
+  const remainingImportCost = totalImport * unitCost;
+  const exportProfit = totalExported * unitValue;
+  return (
+    <div class={'summary'}>
+      <p>
+        Annual import: {totalImport.toFixed()} kWh, an{' '}
+        {(100 * (1 - totalImport / us.hub)).toFixed()}% reduction, costs £
+        {remainingImportCost.toFixed()}.
+      </p>
+      <p>
+        Annual export: {totalExported.toFixed()} kWh, £
+        {(totalExported * unitValue).toFixed()} return.
+      </p>
+      <p>
+        Estimated install cost: £{(flatCost / 1000).toFixed(1)}k + £
+        {(panelCost / 1000).toFixed(1)}k panels + £
+        {(batteryCost / 1000).toFixed(1)}k batteries = £
+        {(systemCost / 1000).toFixed(1)}k.
+      </p>
+      <p>
+        Payback on today's fixed tariffs:{' '}
+        {(
+          systemCost /
+          (originalCost - remainingImportCost + exportProfit)
+        ).toFixed(1)}{' '}
+        years
+      </p>
+      <p>
+        Battery fills {batteryFillDays} days/year, battery empties{' '}
+        {batteryEmptyDays} days/year.
+      </p>
     </div>
   );
 }
@@ -83,20 +174,17 @@ function pointsFor(
 }
 
 function Zoomed({
-  us,
   window: [ws, we],
   w,
+  sim,
+  meteo,
 }: {
   us: UrlState;
   window: [number, number];
   w: number;
+  sim: SimHour[][];
+  meteo: ReturnType<typeof findMeteo>;
 }) {
-  const [meteoData] = useContext(MeteoContext);
-
-  const zone = useMemo(() => findZone(us.loc), [us.loc]);
-  const [slope, ori] = us.ori;
-  const mcsGen = zone.data[slope]?.[Math.round(Math.abs(ori) / 5)];
-
   const h = 200;
   const pt = 10;
   const pb = 30;
@@ -105,11 +193,6 @@ function Zoomed({
   const tw = w - 2 * px;
   // positive
   const thp = 0.8 * th;
-
-  const meteo = useMemo(
-    () => findMeteo(meteoData, us.loc, us.ori),
-    [meteoData, us.loc, us.ori],
-  );
 
   const allDates = allDatesInYear(2025);
 
@@ -125,7 +208,6 @@ function Zoomed({
     0,
     0,
   ]);
-  // const points = pointsFor(toGraph, ws, we, tw, th);
 
   const [meteoAppPoints, meteoRadPoints] = useMemo(() => {
     return [
@@ -138,29 +220,8 @@ function Zoomed({
 
   const shownDates = allDates.slice(Math.floor(ws), Math.ceil(we));
 
-  const radScale = (mcsGen / sum(meteo.rad)) * us.kwp;
-
-  const bwd = unpackBwd(us.bwd!);
-
-  const bwdScale = us.hub / (sum(bwd.flat()) * (365 / 7));
-
-  const simulationResult = simulateYear(
-    // TODO: DST?
-    chunks(
-      meteo.rad.map((x) => x * radScale),
-      24,
-    ),
-    // TODO: DST?
-    range(54)
-      .map(() => bwd.map((v) => v.map((v) => v * bwdScale)))
-      .flat()
-      // 1st jan: wednesday
-      .slice(3),
-    us.bat,
-  );
-
   const solarPoints = pointsFor(
-    simulationResult.map((day) => day.map((res) => res[0])),
+    sim.map((day) => day.map((res) => res[0])),
     ws,
     we,
     tw,
@@ -168,7 +229,7 @@ function Zoomed({
   );
 
   return (
-    <svg width={w} height={h + 400} style={{ 'user-select': 'none' }}>
+    <svg width={w} height={h /*+ 120*/} style={{ 'user-select': 'none' }}>
       <g transform={`translate(${px},${pt})`}>
         {legendarySegmentLines(shownDates, tw, th)}
       </g>
@@ -194,7 +255,7 @@ function Zoomed({
           points={solarPoints.slice(1, -1).join(' ')}
           fill="none"
           stroke={'#4ca'}
-          stroke-dasharray="5, 5"
+          // stroke-dasharray="5, 5"
         />
 
         <line x1={-4} x2={w} y1={thp} y2={thp} stroke="#cccccc88" />

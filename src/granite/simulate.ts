@@ -3,7 +3,7 @@ import { isSetAndFinite } from '../consumption/bill.ts';
 
 export type YearOfKwH = number[][];
 
-type SimHour = [batt: number, imp: number, exp: number];
+export type SimHour = [batt: number, imp: number, exp: number];
 
 interface HouseState {
   cap: number;
@@ -39,7 +39,7 @@ export function simulateYear(
   const ret: SimHour[][] = [];
 
   const state: HouseState = {
-    batt: 2,
+    batt: cap / 2,
     cap,
   };
 

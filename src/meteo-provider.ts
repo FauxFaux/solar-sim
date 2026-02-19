@@ -7,6 +7,12 @@ const meteo6 = await import('./assets/meteo-6.json');
 export interface Meteo {
   temp: number[];
   app: number[];
+  rad: number[];
+}
+
+export interface DecodedMeteo {
+  temp: number[];
+  app: number[];
   rads: number[][];
 }
 
@@ -16,11 +22,11 @@ interface EncodedMeteo {
   rads: number[][];
 }
 
-export const MeteoContext = createContext<State<Meteo[]>>(
-  undefined as unknown as State<Meteo[]>,
+export const MeteoContext = createContext<State<DecodedMeteo[]>>(
+  undefined as unknown as State<DecodedMeteo[]>,
 );
 
-export function onceMeteosLoaded(set: (meteos: Meteo[]) => void) {
+export function onceMeteosLoaded(set: (meteos: DecodedMeteo[]) => void) {
   loadingMeteos.then((v) => v.success && set(v.value));
 }
 

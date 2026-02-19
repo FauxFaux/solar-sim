@@ -215,3 +215,7 @@ form.heating-usage > label {
   width: 100%;
   justify-content: space-evenly;
 }
+
+.summary p {
+  margin: 0.2em 0;
+}
