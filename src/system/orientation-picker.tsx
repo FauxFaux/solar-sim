@@ -9,6 +9,7 @@ export function OrientationPicker({ uss }: { uss: State<UrlState> }) {
   const [us, setUs] = uss;
   const zone = useMemo(() => findZone(us.loc), [us.loc]);
   const [slope, ori] = us.ori;
+  const gen = zone.data[slope]?.[Math.round(Math.abs(ori) / 5)];
   return (
     <div>
       <h3>Solar system</h3>
@@ -31,6 +32,7 @@ export function OrientationPicker({ uss }: { uss: State<UrlState> }) {
         {compassName(ori)} ({ori}° from S)
       </div>
       <div>MCS zone: {zone.name}</div>
+      <div>MCS result: {gen?.toFixed(0)}</div>
     </div>
   );
 }

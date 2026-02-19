@@ -13,11 +13,12 @@ import { Scrub } from './scrub.tsx';
 import { allDatesInYear, DAY_NAMES, MONTH_NAMES } from '../granite/dates.ts';
 import { ordinal, range, sum } from '../granite/numbers.ts';
 import type { Temporal } from 'temporal-polyfill';
-import { chunks, deltaDecode } from '../system/mcs-meta.ts';
+import { chunks } from '../system/mcs-meta.ts';
 import { defaultMeteo, MeteoContext } from '../meteo-provider.ts';
 import { FaSpinner } from 'react-icons/fa6';
-import { simulate } from '../granite/simulate.ts';
+import { simulateYear } from '../granite/simulate.ts';
 import { unpackBwd } from '../consumption/bill.ts';
+import { findZone } from '../system/mcs.ts';
 
 // data file has 16 hours of data, from 06:00 to 21:59.999; 0: 06:00, 1: 07:00, ..., 6: 12:00, ..., 15: 21:00
 
@@ -92,6 +93,10 @@ function Zoomed({
 }) {
   const [meteoData] = useContext(MeteoContext);
 
+  const zone = useMemo(() => findZone(us.loc), [us.loc]);
+  const [slope, ori] = us.ori;
+  const mcsGen = zone.data[slope]?.[Math.round(Math.abs(ori) / 5)];
+
   const h = 200;
   const pt = 10;
   const pb = 30;
@@ -133,22 +138,28 @@ function Zoomed({
 
   const shownDates = allDates.slice(Math.floor(ws), Math.ceil(we));
 
-  const dums = simulate(
+  const radScale = (mcsGen / sum(meteo.rad)) * us.kwp;
+
+  const bwd = unpackBwd(us.bwd!);
+
+  const bwdScale = us.hub / (sum(bwd.flat()) * (365 / 7));
+
+  const simulationResult = simulateYear(
     // TODO: scaling factor
     chunks(
-      meteo.rad.map((x) => x / 500),
+      meteo.rad.map((x) => x * radScale),
       24,
     ),
     range(54)
-      .map(() => unpackBwd(us.bwd!))
+      .map(() => bwd.map((v) => v.map((v) => v * bwdScale)))
       .flat()
       // 1st jan: wednesday
       .slice(3),
-    10,
+    5,
   );
 
   const solarPoints = pointsFor(
-    dums.map((day) => day.map((res) => res[1])),
+    simulationResult.map((day) => day.map((res) => res[0])),
     ws,
     we,
     tw,
