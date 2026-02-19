@@ -29,11 +29,11 @@ export interface UrlState {
   ori: [slope: number, ori: number];
   kwp: number;
 
-  // extracted data from bills, whole week(s?)
+  // extracted data from bills, whole week(s?), packed
   bwd?: number[];
 }
 
-// exampleBill, run through the pack code in bill-analysis
+// exampleBill, run through the pack code in bill.ts
 const defaultBwd = [
   24, 1, -1, 0, 0, 0, -1, -6, 14, 9, 21, -18, 54, -42, -11, -6, -2, 43, 144,
   -156, 79, -59, -28, -32, -2, 1, -1, 3, 0, -1, -1, 7, -12, 21, -23, 0, 3, -2,
@@ -65,6 +65,7 @@ export function UrlHandler() {
           loc: [52.3, -1.4],
           ori: [40, 25],
           kwp: 4.4,
+          bwd: defaultBwd,
         },
   );
 

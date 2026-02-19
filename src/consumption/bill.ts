@@ -3,6 +3,7 @@ import type { Temporal } from 'temporal-polyfill';
 import * as Papa from 'papaparse';
 import { ld2pd, type LocalDate, parseDateHour } from '../granite/dates.ts';
 import { twoDp } from '../granite/numbers.ts';
+import { chunks, deltaDecode, deltaEncode } from '../system/mcs-meta.ts';
 
 export type MaybeNumber = number | undefined | null;
 
@@ -110,3 +111,17 @@ export const timeWindows = {
   evening: [19, 20, 21, 22, 23],
   night: [0, 1, 2, 3, 4, 5],
 } as const;
+
+export function packBwd(goodWeek: number[][]) {
+  if (goodWeek.length !== 7 || goodWeek.some((day) => day.length !== 24)) {
+    throw new Error('Expected a 7x24 array of numbers');
+  }
+  return deltaEncode(goodWeek.flat().map((v) => Math.round(v * 100)));
+}
+
+export function unpackBwd(bwd: number[]) {
+  return chunks(
+    deltaDecode(bwd).map((v) => v / 100),
+    24,
+  );
+}

@@ -11,11 +11,13 @@ import { findMeteo } from './meteo.ts';
 import type { UrlState } from '../url-handler.tsx';
 import { Scrub } from './scrub.tsx';
 import { allDatesInYear, DAY_NAMES, MONTH_NAMES } from '../granite/dates.ts';
-import { ordinal, sum } from '../granite/numbers.ts';
+import { ordinal, range, sum } from '../granite/numbers.ts';
 import type { Temporal } from 'temporal-polyfill';
-import { chunks } from '../system/mcs-meta.ts';
+import { chunks, deltaDecode } from '../system/mcs-meta.ts';
 import { defaultMeteo, MeteoContext } from '../meteo-provider.ts';
 import { FaSpinner } from 'react-icons/fa6';
+import { simulate } from '../granite/simulate.ts';
+import { unpackBwd } from '../consumption/bill.ts';
 
 // data file has 16 hours of data, from 06:00 to 21:59.999; 0: 06:00, 1: 07:00, ..., 6: 12:00, ..., 15: 21:00
 
@@ -127,9 +129,31 @@ function Zoomed({
     ];
   }, [meteo, ws, we, tw]);
 
-  const solarPoints = pointsFor(solarGraph, ws, we, tw, thp);
+  // const solarPoints = pointsFor(solarGraph, ws, we, tw, thp);
 
   const shownDates = allDates.slice(Math.floor(ws), Math.ceil(we));
+
+  const dums = simulate(
+    // TODO: scaling factor
+    chunks(
+      meteo.rad.map((x) => x / 500),
+      24,
+    ),
+    range(54)
+      .map(() => unpackBwd(us.bwd!))
+      .flat()
+      // 1st jan: wednesday
+      .slice(3),
+    10,
+  );
+
+  const solarPoints = pointsFor(
+    dums.map((day) => day.map((res) => res[1])),
+    ws,
+    we,
+    tw,
+    thp,
+  );
 
   return (
     <svg width={w} height={h + 400} style={{ 'user-select': 'none' }}>

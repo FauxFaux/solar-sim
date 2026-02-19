@@ -12,6 +12,7 @@ import { BillView } from './bill-view.tsx';
 import {
   isSetAndFinite,
   type MaybeNumber,
+  packBwd,
   parseBill,
   type ParsedBill,
   timeWindows,
@@ -28,7 +29,6 @@ import {
 } from '../granite/dates.ts';
 import { range } from '../granite/numbers.ts';
 import { TransContext } from '../trans-context.ts';
-import { deltaEncode } from '../system/mcs-meta.ts';
 
 export function BillAnalysis({ uss: [, setUs] }: { uss: State<UrlState> }) {
   const [file, setFile] = useState<File | undefined>(undefined);
@@ -62,7 +62,7 @@ export function BillAnalysis({ uss: [, setUs] }: { uss: State<UrlState> }) {
     const goodWeek = findGoodWeek(bill)[0];
     setUs((us) => ({
       ...us,
-      bwd: deltaEncode(goodWeek.flat().map((v) => Math.round(v * 100))),
+      bwd: packBwd(goodWeek),
     }));
   }, [parsed]);
 

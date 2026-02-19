@@ -69,7 +69,7 @@ export function deltaEncode(arr: number[]): number[] {
 }
 
 export function deltaDecode(arr: number[]): number[] {
-  const out = [];
+  const out: number[] = [];
   let acc = 0;
   for (const v of arr) {
     acc += v;
