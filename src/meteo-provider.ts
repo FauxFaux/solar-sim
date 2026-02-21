@@ -2,7 +2,9 @@ import { range } from './granite/numbers.ts';
 import { deltaDecode, MCS_ZONE_CENTRES } from './system/mcs-meta.ts';
 import { createContext } from 'preact';
 import { sleep, type State, tryTo } from './ts.ts';
-const meteo6 = await import('./assets/meteo-6.json');
+const meteo6 = await import('./assets/meteo-6.json', {
+  with: { type: 'json' },
+});
 
 export interface Meteo {
   temp: number[];
@@ -30,15 +32,17 @@ export function onceMeteosLoaded(set: (meteos: DecodedMeteo[]) => void) {
   loadingMeteos.then((v) => v.success && set(v.value));
 }
 
-export const defaultMeteo = [decodeMeteo(meteo6)];
+export const defaultMeteo = [decodeMeteo(meteo6.default)];
 
 const loadingMeteos = tryTo(loadMeteosRaw);
 
-async function loadMeteosRaw() {
+export async function loadMeteosRaw() {
   await sleep(10);
   return await Promise.all(
     range(MCS_ZONE_CENTRES.length).map(async (zone) => {
-      const { default: data } = await import(`./assets/meteo-${zone}.json`);
+      const { default: data } = await import(`./assets/meteo-${zone}.json`, {
+        with: { type: 'json' },
+      });
       return decodeMeteo(data as EncodedMeteo);
     }),
   );
