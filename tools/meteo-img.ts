@@ -2,6 +2,7 @@ import { loadMeteosRaw } from '../src/meteo-provider.ts';
 import { METEO_HOURS } from '../src/world/meteo-meta.ts';
 import { encode } from 'fast-png';
 import { writeFileSync } from 'node:fs';
+import { range } from '../src/granite/numbers.ts';
 
 async function main() {
   const dpr = 73;
@@ -15,15 +16,12 @@ async function main() {
   const datums = temps + rads;
 
   const img = new Uint8Array(totalMeteos * datums * 365 * 24);
-  const set = (x: number, y: number, val: number) => {
+  let idx = 0;
+  const push = (val: number) => {
     if (val < 0 || val > 1) {
-      throw new Error(`Invalid value: ${val} at (${x}, ${y})`);
+      throw new Error(`Invalid value: ${val} at (${idx})`);
     }
-    const idx = y * w + x;
-    if (img[idx] !== 0) {
-      throw new Error(`Pixel already set at (${idx}: ${x}, ${y})`);
-    }
-    img[idx] = Math.floor(val * 256);
+    img[idx++] = Math.floor(val * 255);
   };
 
   const tempMin = Math.min(
@@ -37,33 +35,38 @@ async function main() {
     ...meteos.map((m) => Math.max(...m.rads.map((v) => Math.max(...v)))),
   );
 
+  const interleavedHours = [
+    12, 13, 11, 14, 10, 15, 9, 16, 8, 17, 7, 18, 6, 19, 5, 20, 4, 21, 3, 22, 2,
+    23, 1, 0,
+  ] as const;
+
+  const ntemp = (temp: number) => (temp - tempMin) / (tempMax - tempMin);
+
   for (let m = 0; m < totalMeteos; ++m) {
-    const meteo = meteos[m];
-    const mRow = (m * 365) / dpr;
     for (let h = 0; h < METEO_HOURS; ++h) {
-      const x = h % w;
-      const hRow = Math.floor(h / w);
-      const ybase = (mRow + hRow) * temps;
-      set(x, ybase, (meteo.temp[h] - tempMin) / (tempMax - tempMin));
-      set(x, ybase + 1, (meteo.app[h] - tempMin) / (tempMax - tempMin));
+      push(ntemp(meteos[m].temp[h]));
     }
 
-    const toff = ((totalMeteos * 365) / dpr) * temps;
-
     for (let h = 0; h < METEO_HOURS; ++h) {
-      const x = h % w;
-      const hRow = Math.floor(h / w);
-      const ybase = toff + (mRow + hRow) * rads;
-      for (let r = 0; r < rads; ++r) {
-        set(x, ybase + r, meteo.rads[r][h] / radMax);
+      push(ntemp(meteos[m].app[h]));
+    }
+  }
+
+  for (const h of interleavedHours) {
+    for (let d = 0; d < 365; ++d) {
+      for (let m = 0; m < totalMeteos; ++m) {
+        for (let r = 0; r < rads; ++r) {
+          push(meteos[m].rads[r][d * 24 + h] / radMax);
+        }
       }
     }
   }
+
   writeFileSync(
     'a.png',
     encode({
-      width: w,
-      height: (totalMeteos * 365 * datums) / dpr,
+      width: 1752,
+      height: 1250,
       data: img,
       depth: 8,
       channels: 1,
