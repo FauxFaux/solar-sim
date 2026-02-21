@@ -115,6 +115,7 @@ function Summary({ sim, us }: { sim: SimHour[][]; us: UrlState }) {
   const importSavings = originalCost - remainingImportCost;
   const kay = (n: number) => `£${(n / 1000).toFixed(1)}k`;
 
+  const paybackYears = systemCost / (importSavings + exportProfit);
   return (
     <div class={'summary'}>
       <p>
@@ -132,7 +133,10 @@ function Summary({ sim, us }: { sim: SimHour[][]; us: UrlState }) {
       </p>
       <p>
         Payback = install / (import savings + export profit) ={' '}
-        {(systemCost / (importSavings + exportProfit)).toFixed(1)} years
+        {paybackYears < 0 || paybackYears > 25
+          ? 'never'
+          : paybackYears.toFixed(1) + ' years'}
+        .
       </p>
       <p>
         Battery fills {batteryFillDays} days/year, battery empties{' '}
