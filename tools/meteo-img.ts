@@ -10,8 +10,9 @@ async function main() {
   const meteos = await loadMeteosRaw();
   const totalMeteos = meteos.length;
 
+  const temps = 2;
   const rads = 8;
-  const datums = 2 + rads;
+  const datums = temps + rads;
 
   const img = new Uint8Array(totalMeteos * datums * 365 * 24);
   const set = (x: number, y: number, val: number) => {
@@ -32,17 +33,29 @@ async function main() {
     ...meteos.map(({ temp, app }) => Math.max(...temp, ...app)),
   );
 
+  const radMax = Math.max(
+    ...meteos.map((m) => Math.max(...m.rads.map((v) => Math.max(...v)))),
+  );
+
   for (let m = 0; m < totalMeteos; ++m) {
     const meteo = meteos[m];
-    const radMax = meteo.rads.map((v) => Math.max(...v));
+    const mRow = (m * 365) / dpr;
     for (let h = 0; h < METEO_HOURS; ++h) {
       const x = h % w;
-      const ybase = ((m * 365) / dpr + Math.floor(h / w)) * datums;
-      // console.log([m, h, x, ybase, ybase * w + x, (ybase + 1) * w + x]);
+      const hRow = Math.floor(h / w);
+      const ybase = (mRow + hRow) * temps;
       set(x, ybase, (meteo.temp[h] - tempMin) / (tempMax - tempMin));
       set(x, ybase + 1, (meteo.app[h] - tempMin) / (tempMax - tempMin));
+    }
+
+    const toff = ((totalMeteos * 365) / dpr) * temps;
+
+    for (let h = 0; h < METEO_HOURS; ++h) {
+      const x = h % w;
+      const hRow = Math.floor(h / w);
+      const ybase = toff + (mRow + hRow) * rads;
       for (let r = 0; r < rads; ++r) {
-        set(x, ybase + 2 + r, meteo.rads[r][h] / radMax[r]);
+        set(x, ybase + r, meteo.rads[r][h] / radMax);
       }
     }
   }
