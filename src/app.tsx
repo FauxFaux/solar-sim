@@ -9,20 +9,30 @@ import { IconContext } from 'react-icons';
 import { MagicalStates } from './magical-states.tsx';
 
 export function App({ uss }: { uss: State<UrlState> }) {
-  return (
-    <MagicalStates>
-      <div id={'tiles'}>
-        <HomeUsage uss={uss} />
-        <SystemDesign uss={uss} />
-        {/*<ConsumptionDesign uss={uss} />*/}
-        <WorldDisplay uss={uss} />
-      </div>
-      <Footer />
-    </MagicalStates>
-  );
+  switch (uss[0].tab) {
+    case 1:
+      return (
+        <MagicalStates>
+          <div id={'tiles'}>
+            <HomeUsage uss={uss} />
+            <SystemDesign uss={uss} />
+            {/*<ConsumptionDesign uss={uss} />*/}
+            <WorldDisplay uss={uss} />
+          </div>
+          <Footer uss={uss} />
+        </MagicalStates>
+      );
+    case 2:
+      return (
+        <div>
+          <p>butts</p>
+          <Footer uss={uss} />
+        </div>
+      );
+  }
 }
 
-function Footer() {
+function Footer({ uss: [us, setUs] }: { uss: State<UrlState> }) {
   const ccBy4 = (
     <a href={'https://creativecommons.org/licenses/by/4.0/'} target={'_blank'}>
       <abbr title={'Creative Commons Attribution 4.0 International License'}>
@@ -75,7 +85,18 @@ function Footer() {
           <a href={'https://github.com/FauxFaux/solar-sim'} target={'_blank'}>
             github
           </a>{' '}
-          (MIT)
+          (
+          <span
+            onClick={() =>
+              setUs((us) => ({
+                ...us,
+                tab: us.tab === 1 ? 2 : 1,
+              }))
+            }
+          >
+            MIT
+          </span>
+          )
         </p>
       </div>
     </IconContext.Provider>

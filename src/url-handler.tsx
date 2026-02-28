@@ -8,6 +8,9 @@ import type { MaybeNumber } from './consumption/bill.ts';
 export interface UrlState {
   v: 1;
 
+  // which app we're showing
+  tab: 1 | 2;
+
   // home usage basic
   hub: number;
 
@@ -55,6 +58,7 @@ export function UrlHandler() {
       ? unpackUs(window.location.hash)
       : {
           v: 1,
+          tab: 1,
           hub: 2700,
           hht: 'p',
           heg: null,
@@ -87,6 +91,7 @@ const urlDictionary = strToU8(
     JSON.stringify(
       shallowSortKeys({
         v: 1,
+        tab: 1,
         hub: 2700,
         hht: 'p',
         heg: null,
