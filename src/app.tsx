@@ -1,35 +1,79 @@
 import type { UrlState } from './url-handler.tsx';
-import type { State } from './ts.ts';
-import { HomeUsage } from './usage';
-import { SystemDesign } from './system';
-import { ConsumptionDesign } from './consumption';
-import { WorldDisplay } from './world';
+import { entriesOf, type State } from './ts.ts';
 import { FaCreativeCommons, FaCreativeCommonsBy } from 'react-icons/fa6';
 import { IconContext } from 'react-icons';
 import { MagicalStates } from './magical-states.tsx';
+import { BasicUsage } from './usage/basic.tsx';
+import { HeatingUsage } from './usage/heating.tsx';
+import { LocationPicker } from './system/location-picker.tsx';
+import { OrientationPicker } from './system/orientation-picker.tsx';
+import { PvLive } from './world/pv-live.tsx';
+import { SysStats } from './system/sys-stats.tsx';
+import { LoadProfile } from './consumption/load-profile.tsx';
+import { BillAnalysis } from './consumption/bill-analysis.tsx';
 
 export function App({ uss }: { uss: State<UrlState> }) {
-  switch (uss[0].tab) {
-    case 1:
-      return (
-        <MagicalStates>
-          <div id={'tiles'}>
-            <HomeUsage uss={uss} />
-            <SystemDesign uss={uss} />
-            {/*<ConsumptionDesign uss={uss} />*/}
-            <WorldDisplay uss={uss} />
+  const tiles = () => {
+    switch (uss[0].tab) {
+      case 1:
+        return (
+          <>
+            {' '}
+            <BasicUsage uss={uss} />
+            <LocationPicker uss={uss} />
+            <OrientationPicker uss={uss} />
+            <SysStats uss={uss} />
+            <PvLive uss={uss} />
+          </>
+        );
+      case 2:
+        return (
+          <>
+            <BasicUsage uss={uss} />
+            <HeatingUsage uss={uss} />
+
+            <LocationPicker uss={uss} />
+            <OrientationPicker uss={uss} />
+            <SysStats uss={uss} />
+            <BillAnalysis uss={uss} />
+            <LoadProfile uss={uss} />
+            <PvLive uss={uss} />
+          </>
+        );
+    }
+  };
+
+  return (
+    <MagicalStates>
+      <Header uss={uss} />
+      <div id={'tiles'}>{tiles()}</div>
+      <Footer uss={uss} />
+    </MagicalStates>
+  );
+}
+
+function Header({ uss: [us, setUs] }: { uss: State<UrlState> }) {
+  const items = {
+    1: 'Explore',
+    2: 'Design',
+    3: 'Debug',
+  } as const;
+
+  return (
+    <header>
+      {entriesOf(items).map(([idN, heading]) => {
+        const tab = Number(idN) as typeof idN;
+        return (
+          <div
+            class={us.tab === tab ? 'selected' : undefined}
+            onClick={() => setUs((us) => ({ ...us, tab }))}
+          >
+            {heading}
           </div>
-          <Footer uss={uss} />
-        </MagicalStates>
-      );
-    case 2:
-      return (
-        <div>
-          <p>butts</p>
-          <Footer uss={uss} />
-        </div>
-      );
-  }
+        );
+      })}
+    </header>
+  );
 }
 
 function Footer({ uss: [us, setUs] }: { uss: State<UrlState> }) {
@@ -85,18 +129,7 @@ function Footer({ uss: [us, setUs] }: { uss: State<UrlState> }) {
           <a href={'https://github.com/FauxFaux/solar-sim'} target={'_blank'}>
             github
           </a>{' '}
-          (
-          <span
-            onClick={() =>
-              setUs((us) => ({
-                ...us,
-                tab: us.tab === 1 ? 2 : 1,
-              }))
-            }
-          >
-            MIT
-          </span>
-          )
+          (MIT)
         </p>
       </div>
     </IconContext.Provider>

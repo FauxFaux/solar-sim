@@ -9,7 +9,7 @@ export interface UrlState {
   v: 1;
 
   // which app we're showing
-  tab: 1 | 2;
+  tab: 1 | 2 | 3;
 
   // home usage basic
   hub: number;
