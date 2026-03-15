@@ -11,13 +11,12 @@ import { findMeteo } from './meteo.ts';
 import type { UrlState } from '../url-handler.tsx';
 import { Scrub } from './scrub.tsx';
 import { allDatesInYear, DAY_NAMES, MONTH_NAMES } from '../granite/dates.ts';
-import { ordinal, range, sum } from '../granite/numbers.ts';
+import { ordinal, sum } from '../granite/numbers.ts';
 import type { Temporal } from 'temporal-polyfill';
 import { chunks } from '../system/mcs-meta.ts';
 import { defaultMeteo, MeteoContext } from '../meteo-provider.ts';
 import { FaSpinner } from 'react-icons/fa6';
-import { type SimHour, simulateYear } from '../granite/simulate.ts';
-import { unpackBwd } from '../consumption/bill.ts';
+import { type SimHour, simulate } from '../granite/simulate.ts';
 import { findZone } from '../system/mcs.ts';
 
 // data file has 16 hours of data, from 06:00 to 21:59.999; 0: 06:00, 1: 07:00, ..., 6: 12:00, ..., 15: 21:00
@@ -30,14 +29,12 @@ export function PvLive({ uss: [us] }: { uss: State<UrlState> }) {
   const windows = useState([278, 285] as [number, number]);
   const [meteos] = useContext(MeteoContext);
   const zone = useMemo(() => findZone(us.loc), [us.loc]);
-  const [meteoData] = useContext(MeteoContext);
   const meteo = useMemo(
-    () => findMeteo(meteoData, us.loc, us.ori),
-    [meteoData, us.loc, us.ori],
+    () => findMeteo(meteos, us.loc, us.ori),
+    [meteos, us.loc, us.ori],
   );
 
   const [window] = windows;
-  const [slope, ori] = us.ori;
 
   useLayoutEffect(() => {
     const measure = () => {
@@ -48,28 +45,7 @@ export function PvLive({ uss: [us] }: { uss: State<UrlState> }) {
     return () => globalWindow.removeEventListener('resize', measure);
   }, []);
 
-  const mcsGen = zone.data[slope]?.[Math.round(Math.abs(ori) / 5)];
-
-  const radScale = (mcsGen / sum(meteo.rad)) * us.kwp;
-
-  const bwd = unpackBwd(us.bwd!);
-
-  const bwdScale = us.hub / (sum(bwd.flat()) * (365 / 7));
-
-  const simulationResult = simulateYear(
-    // TODO: DST?
-    chunks(
-      meteo.rad.map((x) => x * radScale),
-      24,
-    ),
-    // TODO: DST?
-    range(54)
-      .map(() => bwd.map((v) => v.map((v) => v * bwdScale)))
-      .flat()
-      // 1st jan: wednesday
-      .slice(3),
-    us.bat,
-  );
+  const simulationResult = simulate(us, meteo, zone);
 
   return (
     <div style={'max-width: 780px'} ref={frameRef}>

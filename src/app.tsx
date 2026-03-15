@@ -47,7 +47,7 @@ export function App({ uss }: { uss: State<UrlState> }) {
     <MagicalStates>
       <Header uss={uss} />
       <div id={'tiles'}>{tiles()}</div>
-      <Footer uss={uss} />
+      <Footer />
     </MagicalStates>
   );
 }
@@ -76,7 +76,7 @@ function Header({ uss: [us, setUs] }: { uss: State<UrlState> }) {
   );
 }
 
-function Footer({ uss: [us, setUs] }: { uss: State<UrlState> }) {
+function Footer() {
   const ccBy4 = (
     <a href={'https://creativecommons.org/licenses/by/4.0/'} target={'_blank'}>
       <abbr title={'Creative Commons Attribution 4.0 International License'}>

@@ -1,6 +1,11 @@
-// 365 days of 24 hours
-import { isSetAndFinite } from '../consumption/bill.ts';
+import { isSetAndFinite, unpackBwd } from '../consumption/bill.ts';
+import type { UrlState } from '../url-handler.tsx';
+import type { Meteo } from '../meteo-provider.ts';
+import { range, sum } from './numbers.ts';
+import { chunks } from '../system/mcs-meta.ts';
+import type { Zone } from '../system/mcs.ts';
 
+// 365 days of 24 hours
 export type YearOfKwH = number[][];
 
 export type SimHour = [batt: number, imp: number, exp: number];
@@ -8,6 +13,33 @@ export type SimHour = [batt: number, imp: number, exp: number];
 interface HouseState {
   cap: number;
   batt: number;
+}
+
+export function simulate(us: UrlState, meteo: Meteo, zone: Zone) {
+  const [slope, ori] = us.ori;
+
+  const mcsGen = zone.data[slope]?.[Math.round(Math.abs(ori) / 5)];
+
+  const radScale = (mcsGen / sum(meteo.rad)) * us.kwp;
+
+  const bwd = unpackBwd(us.bwd!);
+
+  const bwdScale = us.hub / (sum(bwd.flat()) * (365 / 7));
+
+  return simulateYear(
+    // TODO: DST?
+    chunks(
+      meteo.rad.map((x) => x * radScale),
+      24,
+    ),
+    // TODO: DST?
+    range(54)
+      .map(() => bwd.map((v) => v.map((v) => v * bwdScale)))
+      .flat()
+      // 1st jan: wednesday
+      .slice(3),
+    us.bat,
+  );
 }
 
 function simulateHour(gen: number, use: number, state: HouseState): SimHour {

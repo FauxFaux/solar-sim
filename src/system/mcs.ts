@@ -20,7 +20,7 @@ const table = tableRaw.map((v) =>
   ),
 );
 
-interface Zone {
+export interface Zone {
   name: string;
   loc: [number, number];
   data: number[][];
