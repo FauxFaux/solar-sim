@@ -6,6 +6,9 @@
   color-scheme: dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
+
+  --energy-battery-out-color: #4db6ac;
+  --energy-battery-in-color: #f06292;
 }
 
 a {
@@ -238,6 +241,16 @@ form.heating-usage > label {
   display: flex;
   width: 100%;
   justify-content: space-evenly;
+}
+
+.pie-explain {
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 0.2em 0.6em;
+}
+
+.pie-explain.selected {
+  border-color: white;
 }
 
 /*.summary p {*/

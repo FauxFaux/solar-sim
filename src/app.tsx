@@ -11,6 +11,7 @@ import { PvLive } from './world/pv-live.tsx';
 import { SysStats } from './system/sys-stats.tsx';
 import { LoadProfile } from './consumption/load-profile.tsx';
 import { BillAnalysis } from './consumption/bill-analysis.tsx';
+import { SimSummary } from './world/sim-summary.tsx';
 
 export function App({ uss }: { uss: State<UrlState> }) {
   const tiles = () => {
@@ -22,8 +23,8 @@ export function App({ uss }: { uss: State<UrlState> }) {
             <BasicUsage uss={uss} />
             <LocationPicker uss={uss} />
             <OrientationPicker uss={uss} />
-            <SysStats uss={uss} />
             <PvLive uss={uss} />
+            <SimSummary us={uss[0]} />
           </>
         );
       case 2:

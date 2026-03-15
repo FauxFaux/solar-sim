@@ -63,61 +63,6 @@ export function PvLive({ uss: [us] }: { uss: State<UrlState> }) {
         sim={simulationResult}
         meteo={meteo}
       />
-      <Summary sim={simulationResult} us={us} />
-    </div>
-  );
-}
-
-function Summary({ sim, us }: { sim: SimHour[][]; us: UrlState }) {
-  const simf = sim.flat();
-  const batteryEmptyDays = sim.filter((day) =>
-    day.some((hour) => hour[0] < 0.05),
-  ).length;
-  const batteryFillDays = sim.filter((day) =>
-    day.some((hour) => hour[0] > us.bat * 0.99),
-  ).length;
-  const totalImport = sum(simf.map((v) => v[1])) / 0.99;
-  const totalExported = sum(simf.map((v) => v[2]));
-  const batteryCost = (us.bat / 0.9) * 220;
-  const panelCost = us.kwp * 700;
-  const flatCost = 3000;
-  const systemCost = flatCost + batteryCost + panelCost;
-  const unitCost = 0.2735;
-  const unitValue = 0.12;
-
-  const originalCost = us.hub * unitCost;
-  const remainingImportCost = totalImport * unitCost;
-  const exportProfit = totalExported * unitValue;
-  const importSavings = originalCost - remainingImportCost;
-  const kay = (n: number) => `£${(n / 1000).toFixed(1)}k`;
-
-  const paybackYears = systemCost / (importSavings + exportProfit);
-  return (
-    <div class={'summary'}>
-      <p>
-        Annual import: {totalImport.toFixed()} kWh, a{' '}
-        {(100 * (1 - totalImport / us.hub)).toFixed()}% reduction, saving £
-        {importSavings.toFixed()}, costs £{remainingImportCost.toFixed()}.
-      </p>
-      <p>
-        Annual export: {totalExported.toFixed()} kWh, £
-        {(totalExported * unitValue).toFixed()} return.
-      </p>
-      <p>
-        Estimated install cost: {kay(flatCost)} + {kay(panelCost)} panels +{' '}
-        {kay(batteryCost)} batteries = {kay(systemCost)}.
-      </p>
-      <p>
-        Payback = install / (import savings + export profit) ={' '}
-        {paybackYears < 0 || paybackYears > 25
-          ? 'never'
-          : paybackYears.toFixed(1) + ' years'}
-        .
-      </p>
-      <p>
-        Battery fills {batteryFillDays} days/year, battery empties{' '}
-        {batteryEmptyDays} days/year.
-      </p>
     </div>
   );
 }

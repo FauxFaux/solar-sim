@@ -4,11 +4,14 @@ import { findZone } from './mcs.ts';
 import { ByMonth } from './by-month.tsx';
 import { ByHour } from './by-hour.tsx';
 
+export function mcsGen(oris: [slope: number, ori: number], mcs: number[][]) {
+  const [slope, ori] = oris;
+  return mcs[slope]?.[Math.round(Math.abs(ori) / 5)];
+}
+
 export function SysStats({ uss: [us] }: { uss: State<UrlState> }) {
   const zone = findZone(us.loc);
-  const [slope, ori] = us.ori;
-  const mcs = zone.data;
-  const mcsV = mcs[slope]?.[Math.round(Math.abs(ori) / 5)];
+  const mcsV = mcsGen(us.ori, zone.data);
   const gen = mcsV * us.kwp;
 
   // CITATION NEEDED
