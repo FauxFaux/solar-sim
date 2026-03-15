@@ -11,7 +11,7 @@ import type { ComponentChildren } from 'preact';
 import { FaRegFaceSadCry } from 'react-icons/fa6';
 
 export function SimSummary({ us }: { us: UrlState }) {
-  const [active, setActive] = useState('import');
+  const [active, setActive] = useState('payback');
   const [meteos] = useContext(MeteoContext);
   const zone = useMemo(() => findZone(us.loc), [us.loc]);
   const meteo = useMemo(
