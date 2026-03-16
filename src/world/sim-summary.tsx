@@ -9,6 +9,7 @@ import { arc } from '../granite/arc.ts';
 import { mcsGen } from '../system/sys-stats.tsx';
 import type { ComponentChildren } from 'preact';
 import { FaRegFaceSadCry } from 'react-icons/fa6';
+import { flatCost, unitCost, unitValue } from './magic.ts';
 
 export function SimSummary({ us }: { us: UrlState }) {
   const [active, setActive] = useState('payback');
@@ -34,10 +35,7 @@ export function SimSummary({ us }: { us: UrlState }) {
   const totalExported = sum(simf.map((v) => v[2]));
   const batteryCost = (us.bat / 0.9) * 220;
   const panelCost = us.kwp * 700;
-  const flatCost = 3000;
   const systemCost = flatCost + batteryCost + panelCost;
-  const unitCost = 0.2735;
-  const unitValue = 0.12;
 
   const originalCost = us.hub * unitCost;
   const remainingImportCost = totalImport * unitCost;
@@ -78,7 +76,7 @@ export function SimSummary({ us }: { us: UrlState }) {
                 {(us.hub - totalImport).toFixed()} kWh is covered by generation
               </span>
               , leaving{' '}
-              <span style={{ color: 'red' }}>
+              <span style={{ color: '#faa' }}>
                 {totalImport.toFixed()} kWh to be imported from the grid
               </span>
               .

@@ -21,6 +21,16 @@ export const CAL = 'JFMAMJJASOND' as const;
 
 export const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+export const DAY_NAMES_LONG = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+];
+
 function parseLondon(str: string): Temporal.ZonedDateTime | undefined {
   // as the Temporal parsers don't accept anything fnu
   const instant = new Date(str).getTime();

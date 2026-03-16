@@ -24,7 +24,8 @@ export function simulate(us: UrlState, meteo: Meteo, zone: Zone) {
 
   const bwd = unpackBwd(us.bwd!);
 
-  const bwdScale = us.hub / (sum(bwd.flat()) * (365 / 7));
+  const sumFlat = sum(bwd.flat());
+  const bwdScale = us.hub / (sumFlat * (365 / 7));
 
   return simulateYear(
     // TODO: DST?

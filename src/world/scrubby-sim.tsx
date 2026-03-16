@@ -13,7 +13,7 @@ import { allDatesInYear, DAY_NAMES, MONTH_NAMES } from '../granite/dates.ts';
 import { ordinal, sum } from '../granite/numbers.ts';
 import type { Temporal } from 'temporal-polyfill';
 import { chunks } from '../system/mcs-meta.ts';
-import { defaultMeteo, MeteoContext } from '../meteo-provider.ts';
+import { defaultMeteo, type Meteo, MeteoContext } from '../meteo-provider.ts';
 import { FaSpinner } from 'react-icons/fa6';
 import { type SimHour, simulate } from '../granite/simulate.ts';
 import { findZone } from '../system/mcs.ts';
@@ -66,7 +66,7 @@ export function ScrubbySim({ uss: [us] }: { uss: State<UrlState> }) {
   );
 }
 
-function pointsFor(
+export function pointsFor(
   toGraph: number[][],
   ws: number,
   we: number,
@@ -104,7 +104,7 @@ function Zoomed({
   window: [number, number];
   w: number;
   sim: SimHour[][];
-  meteo: ReturnType<typeof findMeteo>;
+  meteo: Meteo;
 }) {
   const h = 200;
   const pt = 10;
@@ -128,7 +128,7 @@ function Zoomed({
 
   const shownDates = allDates.slice(Math.floor(ws), Math.ceil(we));
 
-  const solarPoints = pointsFor(
+  const batteryPoints = pointsFor(
     sim.map((day) => day.map((res) => res[0])),
     ws,
     we,
@@ -160,7 +160,7 @@ function Zoomed({
 
       <g transform={`translate(${px},${pt})`}>
         <polyline
-          points={solarPoints.slice(1, -1).join(' ')}
+          points={batteryPoints.slice(1, -1).join(' ')}
           fill="none"
           stroke={'#4ca'}
           // stroke-dasharray="5, 5"
@@ -181,7 +181,10 @@ function Zoomed({
   );
 }
 
-function legendaryDayNames(shownDates: Temporal.PlainDate[], tw: number) {
+export function legendaryDayNames(
+  shownDates: Temporal.PlainDate[],
+  tw: number,
+) {
   const dw = tw / shownDates.length;
   return shownDates.map((d, i) => {
     if (dw < 12 && d.dayOfWeek !== 1) return;
@@ -201,7 +204,7 @@ function legendaryDayNames(shownDates: Temporal.PlainDate[], tw: number) {
   });
 }
 
-function legendaryDates(shownDates: Temporal.PlainDate[], tw: number) {
+export function legendaryDates(shownDates: Temporal.PlainDate[], tw: number) {
   const dw = tw / shownDates.length;
   if (dw < 1.5) return;
 
