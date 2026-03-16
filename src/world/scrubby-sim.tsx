@@ -1,4 +1,3 @@
-import pvLive from '../assets/pv-live.json';
 import { type State } from '../ts.ts';
 import {
   useContext,
@@ -23,7 +22,7 @@ import { findZone } from '../system/mcs.ts';
 
 const globalWindow = window;
 
-export function PvLive({ uss: [us] }: { uss: State<UrlState> }) {
+export function ScrubbySim({ uss: [us] }: { uss: State<UrlState> }) {
   const [w, setW] = useState(350);
   const frameRef = useRef<HTMLDivElement>(null);
   const windows = useState([278, 285] as [number, number]);
@@ -117,19 +116,6 @@ function Zoomed({
   const thp = 0.8 * th;
 
   const allDates = allDatesInYear(2025);
-
-  const solarGraph = pvLive.map((v) => [
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    ...v.map((v) => v / 1000),
-    0,
-    0,
-    0,
-  ]);
 
   const [meteoAppPoints, meteoRadPoints] = useMemo(() => {
     return [

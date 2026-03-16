@@ -7,7 +7,7 @@ import { BasicUsage } from './usage/basic.tsx';
 import { HeatingUsage } from './usage/heating.tsx';
 import { LocationPicker } from './system/location-picker.tsx';
 import { OrientationPicker } from './system/orientation-picker.tsx';
-import { PvLive } from './world/pv-live.tsx';
+import { ScrubbySim } from './world/scrubby-sim.tsx';
 import { SysStats } from './system/sys-stats.tsx';
 import { LoadProfile } from './consumption/load-profile.tsx';
 import { BillAnalysis } from './consumption/bill-analysis.tsx';
@@ -23,7 +23,7 @@ export function App({ uss }: { uss: State<UrlState> }) {
             <BasicUsage uss={uss} />
             <LocationPicker uss={uss} />
             <OrientationPicker uss={uss} />
-            <PvLive uss={uss} />
+            <ScrubbySim uss={uss} />
             <SimSummary us={uss[0]} />
           </>
         );
@@ -38,7 +38,7 @@ export function App({ uss }: { uss: State<UrlState> }) {
             <SysStats uss={uss} />
             <BillAnalysis uss={uss} />
             <LoadProfile uss={uss} />
-            <PvLive uss={uss} />
+            <ScrubbySim uss={uss} />
           </>
         );
     }
