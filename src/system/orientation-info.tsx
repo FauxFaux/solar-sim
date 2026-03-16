@@ -13,7 +13,7 @@ export function OrientationInfo({
   uss: State<UrlState>;
 }) {
   const w = 350;
-  const h = 310;
+  const h = 210;
   const tw = 330;
   const twh = tw / 2;
   const th = h - 30;
@@ -83,6 +83,9 @@ export function OrientationInfo({
           {compassName(-((i - oticks / 2) * 360) / oticks)}
         </text>
       ))}
+      <text fill={'white'} text-anchor={'middle'} x={w - 8} y={h - 10}>
+        N
+      </text>
       {range(sticks + 1).map((i) => {
         const v = (i / sticks) * slopes;
         const by = (i * th) / sticks + 2 - (i === sticks ? 10 : 0);

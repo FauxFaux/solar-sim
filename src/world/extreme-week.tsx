@@ -126,7 +126,7 @@ function season(doy: number) {
   if (doy < 60) return 'winter'; // Feb
   if (doy < 150) return 'spring'; // May
   if (doy < 244) return 'summer'; // Sept
-  if (doy < 355) return 'autumn';
+  if (doy < 335) return 'autumn';
   return 'winter';
 }
 
