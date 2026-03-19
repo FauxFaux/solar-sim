@@ -125,6 +125,14 @@ export function BillAnalysis({ uss: [, setUs] }: { uss: State<UrlState> }) {
   );
 }
 
+export function percColourDim(perc: number) {
+  return `hsla(${100 - perc * 100}, 70%, 25%, 0.2)`;
+}
+
+export function percColourBright(perc: number) {
+  return `hsla(${100 - perc * 100}, 70%, 35%, 0.8)`;
+}
+
 function WindowRow({
   window,
   nums,
@@ -170,7 +178,7 @@ function WindowRow({
                 y={0}
                 width={3}
                 height={h}
-                fill={`hsla(${100 - perc * 100}, 70%, 25%, 0.2)`}
+                fill={percColourDim(perc)}
               />
             );
           })}
@@ -185,7 +193,7 @@ function WindowRow({
                   y={0}
                   width={3}
                   height={h}
-                  fill={`hsla(${100 - perc * 100}, 70%, 35%, 0.8)`}
+                  fill={percColourBright(perc)}
                 />
               );
             })}
