@@ -13,6 +13,7 @@ import { LoadProfile } from './consumption/load-profile.tsx';
 import { BillAnalysis } from './consumption/bill-analysis.tsx';
 import { SimSummary } from './world/sim-summary.tsx';
 import { ExtremeWeek } from './world/extreme-week.tsx';
+import { InferLoadProfile } from './consumption/infer-load-profile.tsx';
 
 export function App({ uss }: { uss: State<UrlState> }) {
   const tiles = () => {
@@ -33,14 +34,16 @@ export function App({ uss }: { uss: State<UrlState> }) {
         return (
           <>
             <BasicUsage uss={uss} />
-            <HeatingUsage uss={uss} />
 
             <LocationPicker uss={uss} />
             <OrientationPicker uss={uss} />
-            <SysStats uss={uss} />
             <BillAnalysis uss={uss} />
+            <InferLoadProfile uss={uss} />
             <LoadProfile uss={uss} />
             <ScrubbySim uss={uss} />
+            <SysStats uss={uss} />
+
+            <HeatingUsage uss={uss} />
           </>
         );
     }

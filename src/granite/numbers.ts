@@ -1,6 +1,19 @@
 export const oneDp = (n: number) => Math.round(n * 10) / 10;
 export const twoDp = (n: number) => Math.round(n * 100) / 100;
-export const range = (n: number) => Array.from({ length: n }, (_, i) => i);
+export type Enumerate<
+  N extends number,
+  Acc extends number[] = [],
+> = Acc['length'] extends N
+  ? Acc[number]
+  : Enumerate<N, [...Acc, Acc['length']]>;
+export type Range<F extends number, T extends number> = Exclude<
+  Enumerate<T>,
+  Enumerate<F>
+>;
+
+export function range<N extends number>(n: N) {
+  return Array.from({ length: n }, (_, i) => i as Range<0, N>);
+}
 export const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
 
 export function ordinal(n: number): string {
