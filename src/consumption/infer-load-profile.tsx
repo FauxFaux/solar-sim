@@ -1,15 +1,17 @@
-import { entriesOf, fromEntries, type Result, type State } from '../ts.ts';
+import { entriesOf, type Result, type State } from '../ts.ts';
 import type { UrlState } from '../url-handler.tsx';
 import exampleBill from './example-bill.json';
 import { isSetAndFinite, type ParsedBill } from './bill.ts';
 import { DAY_NAMES, ld2pd } from '../granite/dates.ts';
 import { bucketMean, range, type Range } from '../granite/numbers.ts';
 import { percColourBright } from './bill-analysis.tsx';
+import { numberToWords } from '../granite/words.ts';
+import { unitCost } from '../world/magic.ts';
 
 const BASELINE_PERC = 0.02;
 
 export function InferLoadProfile({
-  uss: [us, setUs],
+  uss:  [us, setUs],
 }: {
   uss: State<UrlState>;
 }) {
@@ -33,22 +35,22 @@ export function InferLoadProfile({
     allValues[Math.floor(allValues.length * BASELINE_PERC)] ?? 0;
   const maxKwh = Math.max(...allValues);
 
+  const baselineW = Math.round(baselineKwh * 1000);
   return (
     <div>
       <h3>Inferred load profile</h3>
-      <Flatogram values={allValues} />
       <SummaryView byDh={byDh} baselineKwh={baselineKwh} maxKwh={maxKwh} />
-      <pre>
-        {JSON.stringify(
-          [
-            ...allValues.slice(0, 10),
-            'butts' + baselineKwh,
-            ...allValues.slice(-10),
-          ],
-          null,
-          1,
-        )}
-      </pre>
+      <p>
+        When everyone's asleep, you're using {baselineW}W, the same as leaving{' '}
+        {numberToWords(Math.round(baselineW / 9.5))}{' '}
+        <abbr
+          title={'9.5W IKEA Trådfri LED bulb, B22, 1055 lumen B22 LED bulb'}
+        >
+          smart bulbs
+        </abbr>{' '}
+        on all day, every day, at a cost of £
+        {(unitCost * baselineKwh * 24).toFixed(2)}/day.
+      </p>
     </div>
   );
 }
