@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from 'preact/hooks';
-import { findMeteo } from './meteo.ts';
+import { findMeteo } from '../granite/meteo/meteo-lookup.ts';
 import type { UrlState } from '../url-handler.tsx';
 import { Scrub } from './scrub.tsx';
 import { allDatesInYear, DAY_NAMES, MONTH_NAMES } from '../granite/dates.ts';

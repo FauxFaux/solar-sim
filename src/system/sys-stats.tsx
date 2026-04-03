@@ -3,7 +3,7 @@ import type { UrlState } from '../url-handler.tsx';
 import { ByMonth } from './by-month.tsx';
 import { useContext, useMemo } from 'preact/hooks';
 import { MeteoContext } from '../meteo-provider.ts';
-import { findMeteo } from '../world/meteo.ts';
+import { findMeteo } from '../granite/meteo/meteo-lookup.ts';
 import { ByHourRad } from './by-hour-rad.tsx';
 import { findZone } from './mcs.ts';
 

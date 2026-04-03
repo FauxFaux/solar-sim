@@ -2,7 +2,7 @@ import { writeFileSync } from 'node:fs';
 import { deltaEncode, MCS_ZONE_CENTRES } from '../src/system/mcs-meta.ts';
 import { readFileSync } from 'fs';
 import { setTimeout } from 'node:timers/promises';
-import { METEO_ORIS, METEO_SLOPES } from '../src/world/meteo-meta.ts';
+import { METEO_ORIS, METEO_SLOPES } from '../src/granite/meteo/meteo-meta.ts';
 
 const mode: 'pack' | 'download' = 'pack';
 

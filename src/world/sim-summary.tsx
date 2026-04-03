@@ -4,7 +4,7 @@ import { sum } from '../granite/numbers.ts';
 import { useContext, useMemo, useState } from 'preact/hooks';
 import { MeteoContext } from '../meteo-provider.ts';
 import { findZone } from '../system/mcs.ts';
-import { findMeteo } from './meteo.ts';
+import { findMeteo } from '../granite/meteo/meteo-lookup.ts';
 import { arc } from '../granite/arc.ts';
 import { mcsGen } from '../system/sys-stats.tsx';
 import type { ComponentChildren } from 'preact';

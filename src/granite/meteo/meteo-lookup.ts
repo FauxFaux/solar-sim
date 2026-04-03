@@ -1,7 +1,7 @@
-import { interpLoc } from '../system/mcs-meta.ts';
-import { range, sum } from '../granite/numbers.ts';
+import { interpLoc } from '../../system/mcs-meta.ts';
+import { range, sum } from '../numbers.ts';
 import { METEO_HOURS, METEO_ORIS } from './meteo-meta.ts';
-import type { DecodedMeteo, Meteo } from '../meteo-provider.ts';
+import type { DecodedMeteo, Meteo } from '../../meteo-provider.ts';
 
 export function findMeteo(
   meteos: DecodedMeteo[],

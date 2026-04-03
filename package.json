@@ -32,9 +32,9 @@
     "prettier": "~3.8",
     "typescript": "~5.9",
     "typescript-eslint": "^8",
-    "vite": "^7",
+    "vite": "^8",
     "vite-bundle-analyzer": "^1",
-    "vite-plugin-preload": "^0.4",
+    "vite-plugin-preload": "^0.7",
     "vitest": "^4"
   }
 }

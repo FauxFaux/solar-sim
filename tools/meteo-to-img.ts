@@ -1,13 +1,14 @@
-import { loadMeteosRaw } from '../src/meteo-provider.ts';
-import { METEO_HOURS } from '../src/world/meteo-meta.ts';
+import { range } from '../src/granite/numbers.ts';
+import {
+  METEO_HOURS,
+  TEMP_MAX,
+  TEMP_MIN,
+} from '../src/granite/meteo/meteo-meta.ts';
 import { encode } from 'fast-png';
 import { writeFileSync } from 'node:fs';
-import { range } from '../src/granite/numbers.ts';
+import { loadMeteosRaw } from '../src/granite/meteo/meteo-from-json.ts';
 
 async function main() {
-  const dpr = 73;
-  const w = 24 * dpr;
-
   const meteos = await loadMeteosRaw();
   const totalMeteos = meteos.length;
 
@@ -31,14 +32,15 @@ async function main() {
     ...meteos.map(({ temp, app }) => Math.max(...temp, ...app)),
   );
 
+  if (tempMin !== TEMP_MIN || tempMax !== TEMP_MAX) {
+    throw new Error(
+      `Invalid temp range: ${tempMin} - ${tempMax}, please update TEMP_MIN/TEMP_MAX`,
+    );
+  }
+
   const radMax = Math.max(
     ...meteos.map((m) => Math.max(...m.rads.map((v) => Math.max(...v)))),
   );
-
-  const interleavedHours = [
-    12, 13, 11, 14, 10, 15, 9, 16, 8, 17, 7, 18, 6, 19, 5, 20, 4, 21, 3, 22, 2,
-    23, 1, 0,
-  ] as const;
 
   const ntemp = (temp: number) => (temp - tempMin) / (tempMax - tempMin);
 
@@ -52,7 +54,7 @@ async function main() {
     }
   }
 
-  for (const h of interleavedHours) {
+  for (const h of range(24)) {
     for (let d = 0; d < 365; ++d) {
       for (let m = 0; m < totalMeteos; ++m) {
         for (let r = 0; r < rads; ++r) {

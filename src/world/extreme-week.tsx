@@ -3,7 +3,7 @@ import type { UrlState } from '../url-handler.tsx';
 import { useContext, useMemo } from 'preact/hooks';
 import { MeteoContext } from '../meteo-provider.ts';
 import { findZone } from '../system/mcs.ts';
-import { findMeteo } from './meteo.ts';
+import { findMeteo } from '../granite/meteo/meteo-lookup.ts';
 import { simulate } from '../granite/simulate.ts';
 import {
   legendaryDates,
