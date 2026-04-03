@@ -120,7 +120,7 @@ export function SimSummary({ us }: { us: UrlState }) {
             <span style={{ color: 'orange' }}>
               total solar generation, {gen.toFixed()} kWh
             </span>
-            ,
+            ,{' '}
             <span style={{ color: exportColour }}>
               {totalExported.toFixed()} kWh is exported
             </span>{' '}

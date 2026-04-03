@@ -11,7 +11,7 @@ import { unitCost } from '../world/magic.ts';
 const BASELINE_PERC = 0.02;
 
 export function InferLoadProfile({
-  uss:  [us, setUs],
+  uss: [us, setUs],
 }: {
   uss: State<UrlState>;
 }) {
