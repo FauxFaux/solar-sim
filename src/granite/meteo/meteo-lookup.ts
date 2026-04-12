@@ -1,63 +1,70 @@
 import { interpLoc } from '../../system/mcs-meta.ts';
 import { range, sum } from '../numbers.ts';
-import { METEO_HOURS, METEO_ORIS } from './meteo-meta.ts';
-import type { DecodedMeteo, Meteo } from '../../meteo-provider.ts';
+import {
+  type Meteo,
+  METEO_HOURS,
+  METEO_ORIS,
+  METEO_SLOPES,
+} from './meteo-meta.ts';
+import { rads, temps } from './meteo-database.ts';
 
 export function findMeteo(
-  meteos: DecodedMeteo[],
   loc: [number, number],
   [slope, ori]: [number, number],
 ): Meteo {
-  const weights = meteos.length > 1 ? interpLoc(loc) : [[0, 1]];
+  const weights = interpLoc(loc);
 
-  const slopeWeight = slope / 90;
+  const slopeFloat = (slope / 90) * METEO_SLOPES.length;
+  const slopeLow = Math.floor(slopeFloat);
+  const slopeHigh = Math.ceil(slopeFloat);
+  const slopeWeight = slopeFloat - slopeLow;
 
-  const oriFac = (180 + ori) / 45;
-  const lowOri = Math.floor(oriFac);
-  const highOri = lowOri + 1;
-  const oriWeight = oriFac - lowOri;
+  // TODO: didn't validate this maths at all, very sick of staring at it
+  // 1 extra: -180 == 180
+  const oriFloat = (180 + ori) / 45 - 1;
+  let oriLow = Math.floor(oriFloat);
+  if (oriLow < 0) oriLow = METEO_ORIS.length - 1;
+  const oriHigh = Math.ceil(oriFloat);
+  const oriWeight = oriFloat - oriLow;
 
-  const rads: Record<number, number[]> = {};
+  console.log({
+    slopeLow,
+    slopeHigh,
+    slopeWeight,
+    oriLow,
+    oriHigh,
+    oriWeight,
+  });
+
+  const radCopy: Record<number, number[]> = {};
   for (const [idx] of weights) {
-    const r = meteos[idx].rads;
-    if (lowOri === 0) {
-      rads[idx] = range(METEO_HOURS).map(
-        (i) =>
-          r[0][i] * (1 - slopeWeight) + r[METEO_ORIS.length][i] * slopeWeight,
-      );
-      continue;
-    }
-    if (highOri === METEO_ORIS.length + 1) {
-      rads[idx] = range(METEO_HOURS).map(
-        (i) =>
-          r[METEO_ORIS.length - 1][i] * (1 - slopeWeight) +
-          r[METEO_ORIS.length * 2 - 1][i] * slopeWeight,
-      );
-      continue;
-    }
+    // slope, ori, hour
+    const r = rads[idx];
 
-    rads[idx] = [];
+    radCopy[idx] = [];
 
     for (let i = 0; i < METEO_HOURS; ++i) {
       const slope0 =
-        r[lowOri - 1][i] * (1 - oriWeight) + r[highOri - 1][i] * oriWeight;
+        r[slopeLow][oriLow][i] * (1 - oriWeight) +
+        r[slopeLow][oriHigh][i] * oriWeight;
       const slope1 =
-        r[lowOri - 1 + METEO_ORIS.length][i] * (1 - oriWeight) +
-        r[highOri - 1 + METEO_ORIS.length][i] * oriWeight;
+        r[slopeHigh][oriLow][i] * (1 - oriWeight) +
+        r[slopeHigh][oriHigh][i] * oriWeight;
+
       const slope = slope0 * (1 - slopeWeight) + slope1 * slopeWeight;
-      rads[idx].push(slope);
+      radCopy[idx].push(slope);
     }
   }
 
   return {
     temp: range(METEO_HOURS).map((i) =>
-      sum(weights.map(([idx, weight]) => weight * meteos[idx].temp[i])),
+      sum(weights.map(([idx, weight]) => weight * temps[idx].temp[i])),
     ),
     app: range(METEO_HOURS).map((i) =>
-      sum(weights.map(([idx, weight]) => weight * meteos[idx].app[i])),
+      sum(weights.map(([idx, weight]) => weight * temps[idx].app[i])),
     ),
     rad: range(METEO_HOURS).map((i) =>
-      sum(weights.map(([idx, weight]) => weight * rads[idx][i])),
+      sum(weights.map(([idx, weight]) => weight * radCopy[idx][i])),
     ),
   };
 }

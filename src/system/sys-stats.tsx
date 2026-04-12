@@ -1,8 +1,7 @@
 import { type State } from '../ts.ts';
 import type { UrlState } from '../url-handler.tsx';
 import { ByMonth } from './by-month.tsx';
-import { useContext, useMemo } from 'preact/hooks';
-import { MeteoContext } from '../meteo-provider.ts';
+import { useMemo } from 'preact/hooks';
 import { findMeteo } from '../granite/meteo/meteo-lookup.ts';
 import { ByHourRad } from './by-hour-rad.tsx';
 import { findZone } from './mcs.ts';
@@ -18,11 +17,7 @@ export function SysStats({ uss: [us] }: { uss: State<UrlState> }) {
   // CITATION NEEDED
   const eff = mcsV / 1100;
 
-  const [meteos] = useContext(MeteoContext);
-  const meteo = useMemo(
-    () => findMeteo(meteos, us.loc, us.ori),
-    [meteos, us.loc, us.ori],
-  );
+  const meteo = useMemo(() => findMeteo(us.loc, us.ori), [us.loc, us.ori]);
 
   return (
     <div>

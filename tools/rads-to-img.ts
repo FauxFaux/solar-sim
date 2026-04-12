@@ -5,20 +5,22 @@ import {
   METEO_SLOPES,
   METEOS_TOTAL,
   RAD_MAX,
+  type Rads,
 } from '../src/granite/meteo/meteo-meta.ts';
 import { encode } from 'fast-png';
 import { writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+import { readFile, rename } from 'node:fs/promises';
 import { join } from 'node:path';
+import { readAvifNode } from './read-avif.ts';
+import { loadRadsFromArr } from '../src/granite/meteo/rads-from-img.ts';
 
 async function main() {
-  const meteos = await readAll();
+  const rads = await readAll();
 
-  // 14
-  const rads = METEO_SLOPES.length * METEO_ORIS.length;
+  const datums = METEO_SLOPES.length * METEO_ORIS.length;
 
-  const img = new Uint8Array(METEOS_TOTAL * rads * METEO_HOURS);
+  const img = new Uint8Array(METEOS_TOTAL * datums * METEO_HOURS);
 
   let idx = 0;
   const push = (val: number) => {
@@ -33,15 +35,17 @@ async function main() {
   for (const h of interleave(24)) {
     for (const d of range(365)) {
       for (const m of range(METEOS_TOTAL)) {
-        for (const rad of range(rads)) {
-          push(meteos[m][rad][d * 24 + h] / RAD_MAX);
+        for (const slope of range(METEO_SLOPES.length)) {
+          for (const ori of range(METEO_ORIS.length)) {
+            push(rads[m][slope][ori][d * 24 + h] / RAD_MAX);
+          }
         }
       }
     }
   }
 
   // 73
-  const width = rads * METEOS_TOTAL * 4;
+  const width = METEO_SLOPES.length * 24 * METEOS_TOTAL;
   const height = Math.ceil(img.length / width);
 
   writeFileSync(
@@ -63,13 +67,18 @@ async function main() {
     '.rads.png',
     '.rads.avif',
   ]);
+
+  await validateRecoveredImage(rads);
+
+  await rename('.rads.avif', 'src/assets/rads.avif');
 }
 
-async function readAll() {
+async function readAll(): Promise<Rads> {
   return Promise.all(
     range(METEOS_TOTAL).map(async (zone) => {
-      const rads: number[][] = [];
+      const rads: number[][][] = [];
       for (const tilt of METEO_SLOPES) {
+        const oris: number[][] = [];
         for (const azimuth of METEO_ORIS) {
           const docGti = JSON.parse(
             await readFile(
@@ -84,12 +93,33 @@ async function readAll() {
               global_tilted_irradiance: number[];
             };
           };
-          rads.push(docGti.hourly.global_tilted_irradiance);
+          oris.push(docGti.hourly.global_tilted_irradiance);
         }
+        rads.push(oris);
       }
       return rads;
     }),
   );
+}
+
+async function validateRecoveredImage(original: Rads) {
+  const recovered = await readAvifNode('.rads.avif');
+  const rec = await loadRadsFromArr(recovered);
+  for (let mcs = 0; mcs < METEOS_TOTAL; ++mcs) {
+    for (let slo = 0; slo < METEO_SLOPES.length; ++slo) {
+      for (let ori = 0; ori < METEO_ORIS.length; ++ori) {
+        for (let h = 0; h < METEO_HOURS; ++h) {
+          const orig = original[mcs][slo][ori][h];
+          const recd = rec[mcs][slo][ori][h];
+          if (Math.abs(orig - recd) > 50) {
+            console.log(
+              `Mismatch at zone ${mcs}, slope ${slo}, ori ${ori}, hr ${h}: ${orig} != ${recd}`,
+            );
+          }
+        }
+      }
+    }
+  }
 }
 
 await main();

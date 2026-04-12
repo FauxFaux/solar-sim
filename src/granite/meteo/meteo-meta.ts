@@ -10,7 +10,22 @@ export const TEMP_MAX = 24;
 
 export const RAD_MAX = 1024;
 
+export interface Meteo {
+  temp: number[];
+  app: number[];
+  rad: number[];
+}
+
 export interface MeteoTemp {
   temp: number[];
   app: number[];
+}
+
+/** mcs, slop, ori, hour of year */
+export type Rads = number[][][][];
+
+export interface VirtualArray {
+  /** 0-255 */
+  data: (i: number) => number;
+  length: number;
 }

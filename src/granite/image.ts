@@ -1,4 +1,6 @@
-export async function imageToArray(url: string) {
+import type { VirtualArray } from './meteo/meteo-meta.ts';
+
+export async function imageToArray(url: string): Promise<VirtualArray> {
   const img = new Image();
   img.src = url;
 
@@ -9,5 +11,11 @@ export async function imageToArray(url: string) {
   const ctx = canvas.getContext('2d')!;
   ctx.drawImage(img, 0, 0);
 
-  return ctx.getImageData(0, 0, img.width, img.height).data;
+  const imageData = ctx.getImageData(0, 0, img.width, img.height).data;
+  console.log('loaded', imageData.length);
+  const BYTES_PER_PIXEL_RGBA = 4;
+  return {
+    data: (i) => imageData[i * BYTES_PER_PIXEL_RGBA],
+    length: imageData.length / BYTES_PER_PIXEL_RGBA,
+  };
 }

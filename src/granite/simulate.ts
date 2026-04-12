@@ -1,9 +1,9 @@
 import { isSetAndFinite, unpackBwd } from '../consumption/bill.ts';
 import type { UrlState } from '../url-handler.tsx';
-import type { Meteo } from '../meteo-provider.ts';
 import { range, sum } from './numbers.ts';
 import { chunks } from '../system/mcs-meta.ts';
 import type { Zone } from '../system/mcs.ts';
+import type { Meteo } from './meteo/meteo-meta.ts';
 
 // 365 days of 24 hours
 export type YearOfKwH = number[][];

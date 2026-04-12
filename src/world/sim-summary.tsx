@@ -1,8 +1,7 @@
 import type { UrlState } from '../url-handler.tsx';
 import { simulate } from '../granite/simulate.ts';
 import { sum } from '../granite/numbers.ts';
-import { useContext, useMemo, useState } from 'preact/hooks';
-import { MeteoContext } from '../meteo-provider.ts';
+import { useMemo, useState } from 'preact/hooks';
 import { findZone } from '../system/mcs.ts';
 import { findMeteo } from '../granite/meteo/meteo-lookup.ts';
 import { arc } from '../granite/arc.ts';
@@ -13,12 +12,8 @@ import { flatCost, unitCost, unitValue } from './magic.ts';
 
 export function SimSummary({ us }: { us: UrlState }) {
   const [active, setActive] = useState('payback');
-  const [meteos] = useContext(MeteoContext);
   const zone = useMemo(() => findZone(us.loc), [us.loc]);
-  const meteo = useMemo(
-    () => findMeteo(meteos, us.loc, us.ori),
-    [meteos, us.loc, us.ori],
-  );
+  const meteo = useMemo(() => findMeteo(us.loc, us.ori), [us.loc, us.ori]);
 
   const gen = us.kwp * mcsGen(us.ori, zone.data);
 

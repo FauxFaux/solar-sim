@@ -13,6 +13,7 @@ import { z } from 'zod/mini';
 import { execFileSync } from 'node:child_process';
 import { loadTempsFromArr } from '../src/granite/meteo/temps-from-img.ts';
 import { renameSync } from 'node:fs';
+import { readAvifNode } from './read-avif.ts';
 
 async function main() {
   const temps = await readAll();
@@ -96,20 +97,9 @@ async function readAll() {
 }
 
 async function validateRecoveredImage(temps: MeteoTemp[]) {
-  execFileSync('avifdec', ['.temps.avif', '.temps-after.png']);
+  const arr = await readAvifNode('.temps.avif');
 
-  const recovered = decode(await readFile('.temps-after.png'));
-  if (recovered.depth !== 8) {
-    throw new Error('recovered image depth mismatch');
-  }
-  if (recovered.channels !== 1) {
-    throw new Error('recovered image channels mismatch');
-  }
-
-  const recoveredData = await loadTempsFromArr(
-    (i) => recovered.data[i],
-    recovered.data.length,
-  );
+  const recoveredData = await loadTempsFromArr(arr);
 
   for (let m = 0; m < METEOS_TOTAL; ++m) {
     for (let h = 0; h < METEO_HOURS; ++h) {

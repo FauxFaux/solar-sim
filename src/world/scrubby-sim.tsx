@@ -13,10 +13,9 @@ import { allDatesInYear, DAY_NAMES, MONTH_NAMES } from '../granite/dates.ts';
 import { ordinal, sum } from '../granite/numbers.ts';
 import type { Temporal } from 'temporal-polyfill';
 import { chunks } from '../system/mcs-meta.ts';
-import { defaultMeteo, type Meteo, MeteoContext } from '../meteo-provider.ts';
-import { FaSpinner } from 'react-icons/fa6';
 import { type SimHour, simulate } from '../granite/simulate.ts';
 import { findZone } from '../system/mcs.ts';
+import type { Meteo } from '../granite/meteo/meteo-meta.ts';
 
 // data file has 16 hours of data, from 06:00 to 21:59.999; 0: 06:00, 1: 07:00, ..., 6: 12:00, ..., 15: 21:00
 
@@ -26,12 +25,8 @@ export function ScrubbySim({ uss: [us] }: { uss: State<UrlState> }) {
   const [w, setW] = useState(350);
   const frameRef = useRef<HTMLDivElement>(null);
   const windows = useState([278, 285] as [number, number]);
-  const [meteos] = useContext(MeteoContext);
   const zone = useMemo(() => findZone(us.loc), [us.loc]);
-  const meteo = useMemo(
-    () => findMeteo(meteos, us.loc, us.ori),
-    [meteos, us.loc, us.ori],
-  );
+  const meteo = useMemo(() => findMeteo(us.loc, us.ori), [us.loc, us.ori]);
 
   const [window] = windows;
 
@@ -48,12 +43,7 @@ export function ScrubbySim({ uss: [us] }: { uss: State<UrlState> }) {
 
   return (
     <div style={'max-width: 780px'} ref={frameRef}>
-      <h3>
-        Simulation{' '}
-        {meteos.length === defaultMeteo.length ? (
-          <FaSpinner style={{ animation: 'rotation 1s linear infinite' }} />
-        ) : null}
-      </h3>
+      <h3>Simulation</h3>
       <Scrub windows={windows} w={w} />
       <Zoomed
         us={us}

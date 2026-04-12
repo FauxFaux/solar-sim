@@ -1,21 +1,25 @@
-import { METEO_HOURS, METEOS_TOTAL, TEMP_MAX, TEMP_MIN } from './meteo-meta.ts';
+import {
+  METEO_HOURS,
+  METEOS_TOTAL,
+  TEMP_MAX,
+  TEMP_MIN,
+  type VirtualArray,
+} from './meteo-meta.ts';
 import { range } from '../numbers.ts';
 
-export async function loadTempsFromArr(
-  arr: (i: number) => number,
-  length: number,
-) {
+export async function loadTempsFromArr(arr: VirtualArray) {
   const datums = 2;
-  if (length !== datums * METEOS_TOTAL * METEO_HOURS) {
+  console.log('import', arr.length, 'bytes');
+  if (arr.length !== datums * METEOS_TOTAL * METEO_HOURS) {
     throw new Error(
-      `Invalid array length: expected ${datums * METEOS_TOTAL * METEO_HOURS}, got ${length}`,
+      `Invalid array length: expected ${datums * METEOS_TOTAL * METEO_HOURS}, got ${arr.length}`,
     );
   }
 
   const ntemp = (temp: number) => temp * (TEMP_MAX - TEMP_MIN) + TEMP_MIN;
 
   let idx = 0;
-  const pop = () => ntemp(arr(idx++) / 255);
+  const pop = () => ntemp(arr.data(idx++) / 255);
 
   const temps = range(METEOS_TOTAL).map(() => ({
     temp: [] as number[],
