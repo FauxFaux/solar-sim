@@ -4,7 +4,6 @@ import {
   interpOri,
   type Meteo,
   METEO_HOURS,
-  METEO_ORIS,
   METEO_SLOPES,
 } from './meteo-meta.ts';
 import { rads, temps } from './meteo-database.ts';

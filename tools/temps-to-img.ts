@@ -6,7 +6,7 @@ import {
   TEMP_MAX,
   TEMP_MIN,
 } from '../src/granite/meteo/meteo-meta.ts';
-import { encode, decode } from 'fast-png';
+import { encode } from 'fast-png';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { z } from 'zod/mini';
