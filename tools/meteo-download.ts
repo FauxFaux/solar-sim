@@ -2,31 +2,20 @@ import { writeFileSync } from 'node:fs';
 import { deltaEncode, MCS_ZONE_CENTRES } from '../src/system/mcs-meta.ts';
 import { readFileSync } from 'fs';
 import { setTimeout } from 'node:timers/promises';
-import { METEO_ORIS, METEO_SLOPES } from '../src/granite/meteo/meteo-meta.ts';
+import {
+  METEO_ORIS,
+  METEO_SLOPES,
+  METEOS_TOTAL,
+} from '../src/granite/meteo/meteo-meta.ts';
 
 const mode: 'pack' | 'download' = 'pack';
 
 async function pack() {
   const dat: {
-    temp: number[];
-    app: number[];
     rads: number[][];
   }[] = [];
 
-  for (let zone = 0; zone < MCS_ZONE_CENTRES.length; ++zone) {
-    const docTemp = (
-      JSON.parse(readFileSync(`meteo-raw/${zone}.json`, 'utf-8')) as {
-        hourly: {
-          temperature_2m: number[];
-          // cloud_cover: number[];
-          // sunshine_duration: number[];
-          apparent_temperature: number[];
-          // direct_radiation: number[];
-          // diffuse_radiation: number[];
-        };
-      }
-    ).hourly;
-
+  for (let zone = 0; zone < METEOS_TOTAL; ++zone) {
     const rads: number[][] = [];
     for (const tilt of METEO_SLOPES) {
       for (const azimuth of METEO_ORIS) {
@@ -49,12 +38,6 @@ async function pack() {
     }
 
     dat.push({
-      temp: deltaEncode(docTemp.temperature_2m.map((t) => Math.round(t))),
-      app: deltaEncode(
-        docTemp.apparent_temperature.map((a, i) =>
-          Math.round(a - docTemp.temperature_2m[i]),
-        ),
-      ),
       rads,
     });
   }

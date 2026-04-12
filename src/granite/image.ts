@@ -1,6 +1,8 @@
 export async function imageToArray(url: string) {
   const img = new Image();
   img.src = url;
+
+  // node-canvas doesn't support decode, or OffscreenCanvas, or..
   await img.decode();
 
   const canvas = new OffscreenCanvas(img.width, img.height);

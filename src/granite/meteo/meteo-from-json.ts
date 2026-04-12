@@ -1,38 +1,34 @@
 import { sleep } from '../../ts.ts';
 import { range } from '../numbers.ts';
-import { deltaDecode, MCS_ZONE_CENTRES } from '../../system/mcs-meta.ts';
+import { deltaDecode } from '../../system/mcs-meta.ts';
+import { loadTemps } from './temps-loader.ts';
+import { METEOS_TOTAL } from './meteo-meta.ts';
 
 interface EncodedMeteo {
-  temp: number[];
-  app: number[];
   rads: number[][];
 }
 
 export async function loadMeteosRaw() {
   await sleep(10);
-  return await Promise.all(
-    range(MCS_ZONE_CENTRES.length).map(async (zone) => {
-      let data: unknown;
-      // partial workaround for https://github.com/vitejs/vite/issues/18582
-      if (import.meta.env?.MODE) {
-        data = (await import(`../../assets/meteo-${zone}.json`)).default;
-      } else {
-        data = (
-          await import(/* @vite-ignore */ `../../assets/meteo-${zone}.json`, {
-            with: { type: 'json' },
-          })
-        ).default;
-      }
-      return decodeMeteo(data as EncodedMeteo);
-    }),
-  );
+  const [temps, rads] = await Promise.all([
+    loadTemps(),
+    Promise.all(
+      range(METEOS_TOTAL).map(async (zone) => {
+        const data: unknown = (await import(`../../assets/meteo-${zone}.json`))
+          .default;
+        return decodeMeteo(data as EncodedMeteo);
+      }),
+    ),
+  ]);
+
+  return range(METEOS_TOTAL).map((i) => ({
+    ...rads[i],
+    ...temps[i],
+  }));
 }
 
-export function decodeMeteo({ temp, app, rads }: EncodedMeteo) {
-  const detemp = deltaDecode(temp);
+export function decodeMeteo({ rads }: EncodedMeteo) {
   return {
-    temp: detemp,
-    app: deltaDecode(app).map((a, i) => a + detemp[i]),
     rads: rads.map((rad) => deltaDecode(rad)),
   };
 }
