@@ -1,6 +1,7 @@
 import { interpLoc } from '../../system/mcs-meta.ts';
 import { range, sum } from '../numbers.ts';
 import {
+  interpOri,
   type Meteo,
   METEO_HOURS,
   METEO_ORIS,
@@ -14,18 +15,12 @@ export function findMeteo(
 ): Meteo {
   const weights = interpLoc(loc);
 
-  const slopeFloat = (slope / 90) * METEO_SLOPES.length;
+  const slopeFloat = (slope / 90) * (METEO_SLOPES.length - 1);
   const slopeLow = Math.floor(slopeFloat);
   const slopeHigh = Math.ceil(slopeFloat);
   const slopeWeight = slopeFloat - slopeLow;
 
-  // TODO: didn't validate this maths at all, very sick of staring at it
-  // 1 extra: -180 == 180
-  const oriFloat = (180 + ori) / 45 - 1;
-  let oriLow = Math.floor(oriFloat);
-  if (oriLow < 0) oriLow = METEO_ORIS.length - 1;
-  const oriHigh = Math.ceil(oriFloat);
-  const oriWeight = oriFloat - oriLow;
+  const { low: oriLow, high: oriHigh, weight: oriWeight } = interpOri(ori);
 
   console.log({
     slopeLow,

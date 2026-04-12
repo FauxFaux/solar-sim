@@ -29,3 +29,23 @@ export interface VirtualArray {
   data: (i: number) => number;
   length: number;
 }
+
+export function interpOri(oriDeg: number): {
+  low: number;
+  high: number;
+  weight: number;
+} {
+  // 0 -> 1
+  const oriFloat = oriDeg / 360 + 0.5;
+  let arrPos = oriFloat * METEO_ORIS.length - 1;
+  if (arrPos < 0) {
+    arrPos += 8;
+  }
+  const low = Math.floor(arrPos);
+  let high = Math.ceil(arrPos);
+  if (high >= METEO_ORIS.length) {
+    high = 0;
+  }
+  const weight = arrPos - low;
+  return { low, high, weight };
+}

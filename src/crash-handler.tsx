@@ -46,7 +46,7 @@ export class CrashHandler extends Component<
           delete otherProps.message;
           delete otherProps.stack;
           return (
-            <p key={i}>
+            <div key={i}>
               <pre>{err.stack}</pre>
               <pre>
                 {Object.keys(otherProps).length ? (
@@ -55,7 +55,7 @@ export class CrashHandler extends Component<
                   <></>
                 )}
               </pre>
-            </p>
+            </div>
           );
         })}
         <h3>state</h3>
