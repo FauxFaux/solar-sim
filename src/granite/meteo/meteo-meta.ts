@@ -1,3 +1,5 @@
+export const METEOS_TOTAL = 25;
+
 export const METEO_HOURS = 24 * 365;
 
 export const METEO_SLOPES = [30, 60] as const;

@@ -33,6 +33,22 @@ export function ordinal(n: number): string {
   }
 }
 
+/**
+ * interleave(24) -> 12, 13, 11, 14, 10 ...
+ * in the hope that the interesting data is in the middle of the array.
+ * front-load?
+ */
+export function interleave<N extends number>(n: N) {
+  const mid = Math.ceil(n / 2);
+  const arr: number[] = [];
+  arr.push(mid);
+  for (let i = 1; i < mid; i++) {
+    arr.push(mid + i, mid - i);
+  }
+  arr.push(0);
+  return arr.filter((v) => v !== n) as Range<0, N>[];
+}
+
 export function bucketMean(arr: number[], buckets: number): number[] {
   if (arr.length < buckets) return arr;
   const result: number[] = [];

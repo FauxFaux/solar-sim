@@ -1,6 +1,7 @@
-import { range } from '../src/granite/numbers.ts';
+import { interleave, range } from '../src/granite/numbers.ts';
 import {
   METEO_HOURS,
+  METEOS_TOTAL,
   TEMP_MAX,
   TEMP_MIN,
 } from '../src/granite/meteo/meteo-meta.ts';
@@ -13,10 +14,10 @@ async function main() {
   const totalMeteos = meteos.length;
 
   const temps = 2;
-  const rads = 8;
+  const rads = 14;
   const datums = temps + rads;
 
-  const img = new Uint8Array(totalMeteos * datums * 365 * 24);
+  const img = new Uint8Array(totalMeteos * rads * 365 * 24);
   let idx = 0;
   const push = (val: number) => {
     if (val < 0 || val > 1) {
@@ -32,9 +33,14 @@ async function main() {
     ...meteos.map(({ temp, app }) => Math.max(...temp, ...app)),
   );
 
-  if (tempMin !== TEMP_MIN || tempMax !== TEMP_MAX) {
+  if (
+    tempMin !== TEMP_MIN ||
+    tempMax !== TEMP_MAX ||
+    totalMeteos !== METEOS_TOTAL
+  ) {
     throw new Error(
-      `Invalid temp range: ${tempMin} - ${tempMax}, please update TEMP_MIN/TEMP_MAX`,
+      'constants mismatch, please update meta.ts, ' +
+        JSON.stringify({ tempMin, tempMax, totalMeteos }),
     );
   }
 
@@ -44,7 +50,11 @@ async function main() {
 
   const ntemp = (temp: number) => (temp - tempMin) / (tempMax - tempMin);
 
-  for (let m = 0; m < totalMeteos; ++m) {
+  for (let m = 0; m < METEOS_TOTAL * 0; ++m) {
+    if (meteos[m].rads.length !== rads) {
+      throw new Error(`rads length mismatch: ${meteos[m].rads.length}`);
+    }
+
     for (let h = 0; h < METEO_HOURS; ++h) {
       push(ntemp(meteos[m].temp[h]));
     }
@@ -54,21 +64,26 @@ async function main() {
     }
   }
 
-  for (const h of range(24)) {
-    for (let d = 0; d < 365; ++d) {
-      for (let m = 0; m < totalMeteos; ++m) {
-        for (let r = 0; r < rads; ++r) {
-          push(meteos[m].rads[r][d * 24 + h] / radMax);
+  for (const h of interleave(24)) {
+    for (const d of range(365)) {
+      for (const m of range(METEOS_TOTAL)) {
+        for (const rad of range(rads)) {
+          push(meteos[m].rads[rad][d * 24 + h] / radMax);
         }
       }
     }
   }
 
+  // 73
+  const width = rads * METEOS_TOTAL * 4;
+  const height = Math.ceil(img.length / width);
+  // const img2 = new Uint8Array(width * height);
+  // img2.set(img);
   writeFileSync(
     'a.png',
     encode({
-      width: 1752,
-      height: 1250,
+      width,
+      height,
       data: img,
       depth: 8,
       channels: 1,
