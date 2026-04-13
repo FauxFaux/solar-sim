@@ -6,10 +6,10 @@ import {
   type VirtualArray,
 } from './meteo-meta.ts';
 import { range } from '../numbers.ts';
+import { sleep } from '../../ts.ts';
 
-export function loadTempsFromArr(arr: VirtualArray) {
+export async function loadTempsFromArr(arr: VirtualArray) {
   const datums = 2;
-  console.log('import', arr.length, 'bytes');
   if (arr.length !== datums * METEOS_TOTAL * METEO_HOURS) {
     throw new Error(
       `Invalid array length: expected ${datums * METEOS_TOTAL * METEO_HOURS}, got ${arr.length}`,
@@ -33,6 +33,7 @@ export function loadTempsFromArr(arr: VirtualArray) {
     for (let h = 0; h < METEO_HOURS; ++h) {
       temps[m].app.push(pop());
     }
+    await sleep(1);
   }
 
   return temps;

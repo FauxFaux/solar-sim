@@ -24,15 +24,6 @@ export function findMeteo(
 
   const { low: oriLow, high: oriHigh, weight: oriWeight } = interpOri(ori);
 
-  console.log({
-    slopeLow,
-    slopeHigh,
-    slopeWeight,
-    oriLow,
-    oriHigh,
-    oriWeight,
-  });
-
   const radCopy: Record<number, number[]> = {};
   for (const [idx] of weights) {
     // slope, ori, hour

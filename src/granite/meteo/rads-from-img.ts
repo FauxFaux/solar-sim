@@ -8,8 +8,9 @@ import {
   type VirtualArray,
 } from './meteo-meta.ts';
 import { interleave, range } from '../numbers.ts';
+import { sleep } from '../../ts.ts';
 
-export function loadRadsFromArr(arr: VirtualArray): Promise<Rads> {
+export async function loadRadsFromArr(arr: VirtualArray): Promise<Rads> {
   const datums = METEO_SLOPES.length * METEO_ORIS.length;
   if (arr.length !== datums * METEOS_TOTAL * METEO_HOURS) {
     throw new Error(
@@ -26,6 +27,8 @@ export function loadRadsFromArr(arr: VirtualArray): Promise<Rads> {
     ),
   );
 
+  await sleep(1);
+
   for (const h of interleave(24)) {
     for (const d of range(365)) {
       for (const m of range(METEOS_TOTAL)) {
@@ -36,6 +39,7 @@ export function loadRadsFromArr(arr: VirtualArray): Promise<Rads> {
         }
       }
     }
+    await sleep(1);
   }
 
   return rads;

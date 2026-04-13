@@ -12,15 +12,19 @@ import { allDatesInYear, DAY_NAMES_LONG } from '../granite/dates.ts';
 import { chunks } from '../system/mcs-meta.ts';
 import { sum } from '../granite/numbers.ts';
 import { unitCost } from './magic.ts';
-import { useMeteo } from '../granite/meteo/use-meteo.ts';
+import { meteoReady, useMeteo } from '../granite/meteo/use-meteo.ts';
+import { LoadingMeteo } from '../granite/meteo/loading-meteo.tsx';
 
 export function ExtremeWeek({ uss: [us] }: { uss: State<UrlState> }) {
   const zone = useMemo(() => findZone(us.loc), [us.loc]);
   const meteo = useMeteo(us);
-  if (!meteo) return <div>spinner</div>;
+  const h3 = <h3>Extreme week</h3>;
+  if (!meteoReady(meteo)) {
+    return <LoadingMeteo meteo={meteo}>{h3}</LoadingMeteo>;
+  }
 
-  const sim = simulate(us, meteo, zone);
-  const rad = chunks(meteo.rad, 24);
+  const sim = simulate(us, meteo.value, zone);
+  const rad = chunks(meteo.value.rad, 24);
   const daily = rad.map((v) => sum(v));
 
   const [ws, we] = dudd(daily);
@@ -79,7 +83,7 @@ export function ExtremeWeek({ uss: [us] }: { uss: State<UrlState> }) {
 
   return (
     <div>
-      <h3>Extreme week</h3>
+      {h3}
       <svg width={w} height={h}>
         <polyline points={radGraph.join(' ')} fill="orange" stroke={'orange'} />
         <polyline

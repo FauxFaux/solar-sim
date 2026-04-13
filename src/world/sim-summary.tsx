@@ -8,17 +8,22 @@ import { mcsGen } from '../system/sys-stats.tsx';
 import type { ComponentChildren } from 'preact';
 import { FaRegFaceSadCry } from 'react-icons/fa6';
 import { flatCost, unitCost, unitValue } from './magic.ts';
-import { useMeteo } from '../granite/meteo/use-meteo.ts';
+import { meteoReady, useMeteo } from '../granite/meteo/use-meteo.ts';
+import { LoadingMeteo } from '../granite/meteo/loading-meteo.tsx';
 
 export function SimSummary({ us }: { us: UrlState }) {
   const [active, setActive] = useState('payback');
   const zone = useMemo(() => findZone(us.loc), [us.loc]);
   const meteo = useMeteo(us);
-  if (!meteo) return <div>spinner</div>;
+
+  const h3 = <h3>Summary</h3>;
+  if (!meteoReady(meteo)) {
+    return <LoadingMeteo meteo={meteo}>{h3}</LoadingMeteo>;
+  }
 
   const gen = us.kwp * mcsGen(us.ori, zone.data);
 
-  const sim = simulate(us, meteo, zone);
+  const sim = simulate(us, meteo.value, zone);
 
   const simf = sim.flat();
   const batteryEmptyDays = sim.filter((day) =>
@@ -175,7 +180,7 @@ export function SimSummary({ us }: { us: UrlState }) {
 
   return (
     <div class={'summary'}>
-      <h3>Summary</h3>
+      {h3}
       <div class={'miniflex'}>
         <Explain id={'import'}>
           <MiniPie

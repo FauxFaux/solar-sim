@@ -4,7 +4,8 @@ import { ByMonth } from './by-month.tsx';
 import { useMemo } from 'preact/hooks';
 import { ByHourRad } from './by-hour-rad.tsx';
 import { findZone } from './mcs.ts';
-import { useMeteo } from '../granite/meteo/use-meteo.ts';
+import { meteoReady, useMeteo } from '../granite/meteo/use-meteo.ts';
+import { LoadingMeteo } from '../granite/meteo/loading-meteo.tsx';
 
 export function mcsGen(oris: [slope: number, ori: number], mcs: number[][]) {
   const [slope, ori] = oris;
@@ -17,12 +18,16 @@ export function SysStats({ uss: [us] }: { uss: State<UrlState> }) {
   // CITATION NEEDED
   const eff = mcsV / 1100;
 
+  const h3 = <h3>Generation</h3>;
+
   const meteo = useMeteo(us);
-  if (!meteo) return <div>spinner</div>;
+  if (!meteoReady(meteo)) {
+    return <LoadingMeteo meteo={meteo}>{h3}</LoadingMeteo>;
+  }
 
   return (
     <div>
-      <h3>Generation</h3>
+      {h3}
       <h4>
         By month, with{' '}
         <span style={'color: #2b2; font-weight: normal'}>usage</span> and{' '}
@@ -30,7 +35,7 @@ export function SysStats({ uss: [us] }: { uss: State<UrlState> }) {
       </h4>
       <ByMonth us={us} />
       <h4>Generation profile on a good day</h4>
-      <ByHourRad kwp={us.kwp} rad={meteo.rad} eff={eff} />
+      <ByHourRad kwp={us.kwp} rad={meteo.value.rad} eff={eff} />
     </div>
   );
 }
