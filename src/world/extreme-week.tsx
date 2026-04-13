@@ -2,7 +2,6 @@ import type { State } from '../ts.ts';
 import type { UrlState } from '../url-handler.tsx';
 import { useMemo } from 'preact/hooks';
 import { findZone } from '../system/mcs.ts';
-import { findMeteo } from '../granite/meteo/meteo-lookup.ts';
 import { simulate } from '../granite/simulate.ts';
 import {
   legendaryDates,
@@ -13,10 +12,12 @@ import { allDatesInYear, DAY_NAMES_LONG } from '../granite/dates.ts';
 import { chunks } from '../system/mcs-meta.ts';
 import { sum } from '../granite/numbers.ts';
 import { unitCost } from './magic.ts';
+import { useMeteo } from '../granite/meteo/use-meteo.ts';
 
 export function ExtremeWeek({ uss: [us] }: { uss: State<UrlState> }) {
   const zone = useMemo(() => findZone(us.loc), [us.loc]);
-  const meteo = useMemo(() => findMeteo(us.loc, us.ori), [us.loc, us.ori]);
+  const meteo = useMeteo(us);
+  if (!meteo) return <div>spinner</div>;
 
   const sim = simulate(us, meteo, zone);
   const rad = chunks(meteo.rad, 24);

@@ -2,9 +2,9 @@ import { type State } from '../ts.ts';
 import type { UrlState } from '../url-handler.tsx';
 import { ByMonth } from './by-month.tsx';
 import { useMemo } from 'preact/hooks';
-import { findMeteo } from '../granite/meteo/meteo-lookup.ts';
 import { ByHourRad } from './by-hour-rad.tsx';
 import { findZone } from './mcs.ts';
+import { useMeteo } from '../granite/meteo/use-meteo.ts';
 
 export function mcsGen(oris: [slope: number, ori: number], mcs: number[][]) {
   const [slope, ori] = oris;
@@ -17,7 +17,8 @@ export function SysStats({ uss: [us] }: { uss: State<UrlState> }) {
   // CITATION NEEDED
   const eff = mcsV / 1100;
 
-  const meteo = useMemo(() => findMeteo(us.loc, us.ori), [us.loc, us.ori]);
+  const meteo = useMeteo(us);
+  if (!meteo) return <div>spinner</div>;
 
   return (
     <div>

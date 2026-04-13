@@ -39,6 +39,7 @@ export type Result<T> =
   | { success: true; value: T }
   | { success: false; error: Error };
 
+/** notably, the returned promise does not reject */
 export async function tryTo<T>(fn: () => Promise<T>): Promise<Result<T>> {
   try {
     const value = await fn();

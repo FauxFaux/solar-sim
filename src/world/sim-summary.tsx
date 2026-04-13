@@ -3,17 +3,18 @@ import { simulate } from '../granite/simulate.ts';
 import { sum } from '../granite/numbers.ts';
 import { useMemo, useState } from 'preact/hooks';
 import { findZone } from '../system/mcs.ts';
-import { findMeteo } from '../granite/meteo/meteo-lookup.ts';
 import { arc } from '../granite/arc.ts';
 import { mcsGen } from '../system/sys-stats.tsx';
 import type { ComponentChildren } from 'preact';
 import { FaRegFaceSadCry } from 'react-icons/fa6';
 import { flatCost, unitCost, unitValue } from './magic.ts';
+import { useMeteo } from '../granite/meteo/use-meteo.ts';
 
 export function SimSummary({ us }: { us: UrlState }) {
   const [active, setActive] = useState('payback');
   const zone = useMemo(() => findZone(us.loc), [us.loc]);
-  const meteo = useMemo(() => findMeteo(us.loc, us.ori), [us.loc, us.ori]);
+  const meteo = useMeteo(us);
+  if (!meteo) return <div>spinner</div>;
 
   const gen = us.kwp * mcsGen(us.ori, zone.data);
 

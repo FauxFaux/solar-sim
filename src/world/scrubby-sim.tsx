@@ -1,6 +1,5 @@
 import { type State } from '../ts.ts';
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { findMeteo } from '../granite/meteo/meteo-lookup.ts';
 import type { UrlState } from '../url-handler.tsx';
 import { Scrub } from './scrub.tsx';
 import { allDatesInYear, DAY_NAMES, MONTH_NAMES } from '../granite/dates.ts';
@@ -10,6 +9,7 @@ import { chunks } from '../system/mcs-meta.ts';
 import { type SimHour, simulate } from '../granite/simulate.ts';
 import { findZone } from '../system/mcs.ts';
 import type { Meteo } from '../granite/meteo/meteo-meta.ts';
+import { useMeteo } from '../granite/meteo/use-meteo.ts';
 
 // data file has 16 hours of data, from 06:00 to 21:59.999; 0: 06:00, 1: 07:00, ..., 6: 12:00, ..., 15: 21:00
 
@@ -20,7 +20,8 @@ export function ScrubbySim({ uss: [us] }: { uss: State<UrlState> }) {
   const frameRef = useRef<HTMLDivElement>(null);
   const windows = useState([278, 285] as [number, number]);
   const zone = useMemo(() => findZone(us.loc), [us.loc]);
-  const meteo = useMemo(() => findMeteo(us.loc, us.ori), [us.loc, us.ori]);
+  const meteo = useMeteo(us);
+  if (!meteo) return <div>spinner</div>;
 
   const [window] = windows;
 

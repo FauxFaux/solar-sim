@@ -5,10 +5,13 @@ import {
   type Meteo,
   METEO_HOURS,
   METEO_SLOPES,
+  type MeteoTemp,
+  type Rads,
 } from './meteo-meta.ts';
-import { rads, temps } from './meteo-database.ts';
 
 export function findMeteo(
+  temps: MeteoTemp[],
+  rads: Rads,
   loc: [number, number],
   [slope, ori]: [number, number],
 ): Meteo {
