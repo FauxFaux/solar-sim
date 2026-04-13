@@ -9,7 +9,7 @@ import {
 } from './meteo-meta.ts';
 import { interleave, range } from '../numbers.ts';
 
-export async function loadRadsFromArr(arr: VirtualArray): Promise<Rads> {
+export function loadRadsFromArr(arr: VirtualArray): Promise<Rads> {
   const datums = METEO_SLOPES.length * METEO_ORIS.length;
   if (arr.length !== datums * METEOS_TOTAL * METEO_HOURS) {
     throw new Error(

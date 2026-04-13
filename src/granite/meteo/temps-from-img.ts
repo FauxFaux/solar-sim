@@ -7,7 +7,7 @@ import {
 } from './meteo-meta.ts';
 import { range } from '../numbers.ts';
 
-export async function loadTempsFromArr(arr: VirtualArray) {
+export function loadTempsFromArr(arr: VirtualArray) {
   const datums = 2;
   console.log('import', arr.length, 'bytes');
   if (arr.length !== datums * METEOS_TOTAL * METEO_HOURS) {
